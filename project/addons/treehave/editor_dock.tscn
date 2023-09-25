@@ -1,9 +1,107 @@
-[gd_scene format=3 uid="uid://bwnu8ilflfart"]
+[gd_scene load_steps=2 format=3 uid="uid://bwnu8ilflfart"]
+
+[ext_resource type="Script" path="res://addons/treehave/editor_dock.gd" id="1_muj4c"]
 
 [node name="EditorDock" type="PanelContainer"]
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_muj4c")
 
-[node name="Label" type="Label" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
-text = "TREEHAVE DOCK"
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "HMM"
+
+[node name="GraphEdit" type="GraphEdit" parent="HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GraphNode" type="GraphNode" parent="HBoxContainer/GraphEdit"]
+layout_mode = 0
+offset_left = 475.0
+offset_top = 126.0
+offset_right = 588.0
+offset_bottom = 206.0
+mouse_filter = 1
+title = "Root"
+position_offset = Vector2(475, 126)
+show_close = true
+slot/0/left_enabled = false
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 1
+slot/0/right_color = Color(1, 0.498039, 0, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+
+[node name="Label" type="Label" parent="HBoxContainer/GraphEdit/GraphNode"]
+layout_mode = 2
+text = "LABEL"
+
+[node name="GraphNode2" type="GraphNode" parent="HBoxContainer/GraphEdit"]
+layout_mode = 0
+offset_left = 729.0
+offset_top = 246.0
+offset_right = 890.0
+offset_bottom = 326.0
+mouse_filter = 1
+title = "Child Node"
+position_offset = Vector2(729, 246)
+show_close = true
+slot/0/left_enabled = true
+slot/0/left_type = 1
+slot/0/left_color = Color(1, 0.498039, 0, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 1
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+
+[node name="Label" type="Label" parent="HBoxContainer/GraphEdit/GraphNode2"]
+layout_mode = 2
+text = "LABEL"
+
+[node name="GraphNode3" type="GraphNode" parent="HBoxContainer/GraphEdit"]
+layout_mode = 0
+offset_left = 728.0
+offset_top = 410.0
+offset_right = 889.0
+offset_bottom = 490.0
+mouse_filter = 1
+title = "Child Node"
+position_offset = Vector2(728, 410)
+show_close = true
+slot/0/left_enabled = true
+slot/0/left_type = 1
+slot/0/left_color = Color(1, 0.498039, 0, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 1
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+
+[node name="Label" type="Label" parent="HBoxContainer/GraphEdit/GraphNode3"]
+layout_mode = 2
+text = "LABEL"
+
+[connection signal="connection_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_connection_request"]
+[connection signal="delete_nodes_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
+[connection signal="disconnection_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_disconnection_request"]
+[connection signal="gui_input" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_gui_input"]
