@@ -33,8 +33,6 @@ func _on_graph_edit_gui_input(event) -> void:
 	if not event is InputEventMouseButton or not event.button_index == 2 or not event.pressed:
 		return
 
-	print(event)
-
 
 func _on_add_scene_button_pressed() -> void:
 	_file_dialog.show()

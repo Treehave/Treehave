@@ -10,10 +10,17 @@ func _enter_tree():
 	# Initialization of the plugin goes here.
 	# Load the dock scene and instantiate it.
 	dock = preload("res://addons/treehave/editor_dock.tscn").instantiate()
+	get_editor_interface().get_selection().selection_changed.connect(_on_selection_changed)
 
 	# Add the loaded scene to the docks.
 	add_control_to_bottom_panel(dock, "Treehave")
 	# Note that LEFT_UL means the left of the editor, upper-left dock.
+
+
+func _on_selection_changed()->void:
+	var selected_objects := get_editor_interface().get_selection().get_selected_nodes()
+	for object in selected_objects:
+		print(object is BeehaveTree)
 
 
 func _exit_tree():

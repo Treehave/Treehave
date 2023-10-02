@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bwnu8ilflfart"]
+[gd_scene load_steps=3 format=3 uid="uid://bwnu8ilflfart"]
 
 [ext_resource type="Script" path="res://addons/treehave/editor_dock.gd" id="1_muj4c"]
+[ext_resource type="Script" path="res://addons/treehave/tree_edit.gd" id="2_p620u"]
 
 [node name="EditorDock" type="PanelContainer"]
 anchors_preset = 15
@@ -46,16 +47,19 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_horizontal = 3
+arrange_nodes_button_hidden = true
+script = ExtResource("2_p620u")
 
 [node name="GraphNode2" type="GraphNode" parent="HBoxContainer/GraphEdit"]
+unique_name_in_owner = true
 layout_mode = 0
-offset_left = 671.0
-offset_top = 193.0
-offset_right = 832.0
-offset_bottom = 273.0
+offset_left = 227.0
+offset_top = 309.0
+offset_right = 388.0
+offset_bottom = 389.0
 mouse_filter = 1
 title = "Child Node"
-position_offset = Vector2(671, 193)
+position_offset = Vector2(227, 309)
 show_close = true
 slot/0/left_enabled = true
 slot/0/left_type = 1
@@ -72,14 +76,15 @@ layout_mode = 2
 text = "LABEL"
 
 [node name="GraphNode3" type="GraphNode" parent="HBoxContainer/GraphEdit"]
+unique_name_in_owner = true
 layout_mode = 0
-offset_left = 585.0
-offset_top = 392.0
-offset_right = 746.0
-offset_bottom = 472.0
+offset_left = 564.0
+offset_top = 324.0
+offset_right = 725.0
+offset_bottom = 404.0
 mouse_filter = 1
 title = "Child Node"
-position_offset = Vector2(585, 392)
+position_offset = Vector2(564, 324)
 show_close = true
 slot/0/left_enabled = true
 slot/0/left_type = 1
@@ -94,6 +99,32 @@ slot/0/draw_stylebox = true
 [node name="Label" type="Label" parent="HBoxContainer/GraphEdit/GraphNode3"]
 layout_mode = 2
 text = "LABEL"
+
+[node name="GraphNode" type="GraphNode" parent="HBoxContainer/GraphEdit"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 524.0
+offset_top = 146.0
+offset_right = 696.0
+offset_bottom = 226.0
+mouse_filter = 1
+position_offset = Vector2(524, 146)
+slot/0/left_enabled = false
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = false
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/GraphEdit/GraphNode"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/GraphEdit/GraphNode/PanelContainer"]
+layout_mode = 2
+text = "AHAHAHAHHAHA"
 
 [connection signal="gui_input" from="HBoxContainer/SelectionPanel" to="." method="_on_selection_panel_gui_input"]
 [connection signal="pressed" from="HBoxContainer/SelectionPanel/PanelVBox/AddSceneButton" to="." method="_on_add_scene_button_pressed"]
