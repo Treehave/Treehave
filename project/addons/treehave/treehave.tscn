@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bwnu8ilflfart"]
+[gd_scene load_steps=3 format=3 uid="uid://bpsia1in7jcs6"]
 
 [ext_resource type="Script" path="res://addons/treehave/editor_dock.gd" id="1_muj4c"]
 [ext_resource type="Script" path="res://addons/treehave/tree_edit.gd" id="2_p620u"]
 
-[node name="EditorDock" type="PanelContainer"]
+[node name="Treehave" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
