@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://d3w4f0x3e4pfu"]
+
+[node name="TestNode" type="GraphNode"]
+offset_right = 150.0
+offset_bottom = 77.0
+title = "TestNode"
+show_close = true
+slot/0/left_enabled = true
+slot/0/left_type = 1
+slot/0/left_color = Color(0.992157, 0.556863, 0.196078, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 1
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://ubqx67ayqx7g"]
+
+[ext_resource type="Script" path="res://addons/treehave/graph_node_spawn_button.gd" id="1_ccf7e"]
+
+[node name="GraphNodeSpawnButton" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+script = ExtResource("1_ccf7e")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]
