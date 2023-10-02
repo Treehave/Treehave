@@ -19,8 +19,14 @@ func _enter_tree():
 
 func _on_selection_changed()->void:
 	var selected_objects := get_editor_interface().get_selection().get_selected_nodes()
-	for object in selected_objects:
-		print(object is BeehaveTree)
+
+	if selected_objects.size() > 1:
+		return
+
+	var selected_object := selected_objects[0]
+
+	if selected_object is BeehaveTree:
+		dock.set_tree(selected_object)
 
 
 func _exit_tree():

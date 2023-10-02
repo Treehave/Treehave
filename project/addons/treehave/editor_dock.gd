@@ -9,6 +9,10 @@ var _node_spawn_button_preload : PackedScene = preload(
 @onready var _panel_vbox: VBoxContainer = %PanelVBox
 
 
+func set_tree(tree: BeehaveTree):
+	print(tree)
+
+
 func _on_graph_edit_connection_request(from_node: StringName, from_port: int, to_node: StringName, to_port: int) -> void:
 	var connections := _graph_edit.get_connection_list()
 
