@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bpsia1in7jcs6"]
 
-[ext_resource type="Script" path="res://addons/treehave/editor_dock.gd" id="1_muj4c"]
+[ext_resource type="Script" path="res://addons/treehave/treehave.gd" id="1_muj4c"]
 [ext_resource type="Script" path="res://addons/treehave/tree_edit.gd" id="2_p620u"]
 
 [node name="Treehave" type="PanelContainer"]
