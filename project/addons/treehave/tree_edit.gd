@@ -13,4 +13,7 @@ func _draw():
 
 
 func _calculate_center_position(control: Control) -> Vector2:
-	return control.position + control.size / 2
+	var x_center_posiiton = control.position.x + (control.size.x / 2 * zoom)
+	var y_center_position = control.position.y + (control.size.y / 2 * zoom)
+
+	return Vector2(x_center_posiiton, y_center_position)
