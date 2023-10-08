@@ -3,6 +3,7 @@ extends Control
 
 var _node_spawn_button_preload : PackedScene = preload(
 				"res://addons/treehave/graph_node_spawn_button.tscn")
+var _current_behavior_tree : BeehaveTree
 
 @onready var _graph_edit: GraphEdit = %GraphEdit
 @onready var _file_dialog: FileDialog = %FileDialog
@@ -10,7 +11,38 @@ var _node_spawn_button_preload : PackedScene = preload(
 
 
 func set_tree(tree: BeehaveTree):
-	print(tree)
+	_current_behavior_tree = tree
+	_clear_current_graph()
+	_build_current_tree_graph()
+
+
+func _clear_current_graph()->void:
+	# Delete all children of the GraphEdit.
+	for node in _graph_edit.get_children():
+		node.queue_free()
+
+
+func _build_current_tree_graph()->void:
+	# Translates the beehave tree represented by _current_behavior_tree into a graph.
+	var root_node := _create_graph_node(_current_behavior_tree)
+	_add_graph_for_children(_current_behavior_tree, root_node)
+
+
+func _add_graph_for_children(root:Node, parent_graph:GraphNode)->void:
+	# For each child of root, create a graph node and connect it to parent_graph
+	# that last part's not implemented yet
+	for child in root.get_children():
+		var graph_node := _create_graph_node(child)
+		# connect the graph_node to parent_graph here
+		_add_graph_for_children(child, graph_node)
+
+
+func _create_graph_node(from:Node)->GraphNode:
+	# Create a new graph node with the same name as "from" and return it
+	var graph_node := GraphNode.new()
+	graph_node.title = from.name
+	_graph_edit.add_child(graph_node)
+	return graph_node
 
 
 func _on_graph_edit_connection_request(from_node: StringName, from_port: int, to_node: StringName, to_port: int) -> void:
