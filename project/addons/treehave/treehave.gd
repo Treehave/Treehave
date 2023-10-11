@@ -46,13 +46,6 @@ func _create_graph_node(from:Node)->GraphNode:
 
 
 func _on_graph_edit_connection_request(from_node: StringName, from_port: int, to_node: StringName, to_port: int) -> void:
-	var connections := _graph_edit.get_connection_list()
-
-	for connection in connections:
-		if connection.to == to_node and connection.to_port == to_port:
-			_graph_edit.disconnect_node(connection.from, connection.from_port, connection.to, connection.to_port)
-			break
-
 	_graph_edit.connect_node(from_node, from_port, to_node, to_port)
 
 
