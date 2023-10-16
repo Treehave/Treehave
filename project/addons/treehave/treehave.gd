@@ -35,7 +35,7 @@ func _add_graph_for_children(root:Node, parent_graph:GraphNode)->void:
 	# that last part's not implemented yet
 	for child in root.get_children():
 		var graph_node := _create_graph_node(child)
-		# connect the graph_node to parent_graph here
+		_graph_edit.connect_node(parent_graph.name, 0, graph_node.name, 0)
 		_add_graph_for_children(child, graph_node)
 
 
