@@ -1,8 +1,17 @@
 [gd_scene format=3 uid="uid://d3w4f0x3e4pfu"]
 
 [node name="GraphNodePreset" type="GraphNode"]
-offset_right = 150.0
-offset_bottom = 77.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -40.0
+offset_right = 110.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
 title = "GraphNodePreset"
 show_close = true
 slot/0/left_enabled = true

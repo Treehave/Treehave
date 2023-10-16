@@ -11,8 +11,29 @@ script = ExtResource("1_c5662")
 [node name="SequenceComposite" type="Node" parent="."]
 script = ExtResource("2_e2uvp")
 
-[node name="ActionLeaf" type="Node" parent="SequenceComposite"]
+[node name="SequenceComposite" type="Node" parent="SequenceComposite"]
+script = ExtResource("2_e2uvp")
+
+[node name="SequenceComposite" type="Node" parent="SequenceComposite/SequenceComposite"]
+script = ExtResource("2_e2uvp")
+
+[node name="SequenceComposite2" type="Node" parent="SequenceComposite/SequenceComposite"]
+script = ExtResource("2_e2uvp")
+
+[node name="SequenceComposite3" type="Node" parent="SequenceComposite/SequenceComposite"]
+script = ExtResource("2_e2uvp")
+
+[node name="ActionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
 script = ExtResource("3_ge8le")
 
-[node name="ConditionLeaf" type="Node" parent="SequenceComposite"]
+[node name="ConditionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
 script = ExtResource("4_0dcfv")
+
+[node name="ActionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
+script = ExtResource("3_ge8le")
+
+[node name="ConditionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
+script = ExtResource("4_0dcfv")
+
+[node name="SequenceComposite2" type="Node" parent="SequenceComposite"]
+script = ExtResource("2_e2uvp")
