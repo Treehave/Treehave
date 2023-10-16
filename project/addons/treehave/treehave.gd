@@ -1,8 +1,10 @@
 @tool
 extends Control
 
-var _node_spawn_button_preload : PackedScene = preload(
+var _node_spawn_button_preload := preload(
 				"res://addons/treehave/graph_node_spawn_button.tscn")
+var _graph_node_preset := preload(
+				"res://addons/treehave/preset_nodes/graph_node_preset.tscn")
 var _current_behavior_tree : BeehaveTree
 
 @onready var _graph_edit: GraphEdit = %GraphEdit
@@ -38,9 +40,10 @@ func _add_graph_for_children(root:Node, parent_graph:GraphNode)->void:
 
 
 func _create_graph_node(from:Node)->GraphNode:
-	# Create a new graph node with the same name as "from" and return it
-	var graph_node := GraphNode.new()
+	# Create a new graph node with the same name and title as "from" and return it
+	var graph_node := _graph_node_preset.instantiate()
 	graph_node.title = from.name
+	graph_node.set_name(from.name)
 	_graph_edit.add_child(graph_node)
 	return graph_node
 
@@ -68,7 +71,6 @@ func _on_add_scene_button_pressed() -> void:
 
 
 func _on_file_dialog_file_selected(path: String) -> void:
-	print(path)
 	var _path_array : Array = path.split("/")
 	var _node_name = _path_array[_path_array.size() - 1]
 

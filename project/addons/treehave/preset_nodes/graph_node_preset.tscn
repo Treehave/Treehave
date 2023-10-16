@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://d3w4f0x3e4pfu"]
 
-[node name="TestNode" type="GraphNode"]
+[node name="GraphNodePreset" type="GraphNode"]
 offset_right = 150.0
 offset_bottom = 77.0
-title = "TestNode"
+title = "GraphNodePreset"
 show_close = true
 slot/0/left_enabled = true
 slot/0/left_type = 1
