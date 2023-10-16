@@ -132,14 +132,6 @@ func _get_node_width(node: Node, depth := -1) -> int:
 	return width
 
 
-func _on_graph_edit_connection_request(from_node: StringName, from_port: int, to_node: StringName, to_port: int) -> void:
-	_graph_edit.connect_node(from_node, from_port, to_node, to_port)
-
-
-func _on_graph_edit_disconnection_request(from_node: StringName, from_port: int, to_node: StringName, to_port: int) -> void:
-	_graph_edit.disconnect_node(from_node, from_port, to_node, to_port)
-
-
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	for node_name in nodes:
 		_graph_edit.get_node(str(node_name)).queue_free()

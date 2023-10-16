@@ -56,7 +56,5 @@ script = ExtResource("2_p620u")
 [connection signal="gui_input" from="HBoxContainer/SelectionPanel" to="." method="_on_selection_panel_gui_input"]
 [connection signal="pressed" from="HBoxContainer/SelectionPanel/PanelVBox/AddSceneButton" to="." method="_on_add_scene_button_pressed"]
 [connection signal="file_selected" from="HBoxContainer/SelectionPanel/PanelVBox/AddSceneButton/FileDialog" to="." method="_on_file_dialog_file_selected"]
-[connection signal="connection_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_connection_request"]
 [connection signal="delete_nodes_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
-[connection signal="disconnection_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_disconnection_request"]
 [connection signal="gui_input" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_gui_input"]
