@@ -5,8 +5,6 @@ extends Control
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
 
-var _node_spawn_button_preload := preload(
-				"res://addons/treehave/graph_node_spawn_button.tscn")
 var _graph_node_preset := preload(
 				"res://addons/treehave/preset_nodes/graph_node_preset.tscn")
 var _current_behavior_tree: BeehaveTree
@@ -14,9 +12,6 @@ var _current_behavior_tree: BeehaveTree
 var _node_to_graph_node_map: Dictionary = {}
 
 @onready var _graph_edit: GraphEdit = %GraphEdit
-@onready var _file_dialog: FileDialog = %FileDialog
-@onready var _panel_vbox: VBoxContainer = %PanelVBox
-
 
 func set_tree(tree: BeehaveTree) -> void:
 	_current_behavior_tree = tree
@@ -140,23 +135,3 @@ func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 func _on_graph_edit_gui_input(event) -> void:
 	if not event is InputEventMouseButton or not event.button_index == 2 or not event.pressed:
 		return
-
-
-func _on_add_scene_button_pressed() -> void:
-	_file_dialog.show()
-
-
-func _on_file_dialog_file_selected(path: String) -> void:
-	var _path_array: Array[String] = path.split("/")
-	var _node_name := _path_array[_path_array.size() - 1]
-
-	var _node_spawn_button := _node_spawn_button_preload.instantiate()
-	_node_spawn_button.set_text(_node_name)
-	_node_spawn_button.node_path = path
-	_node_spawn_button.graph_edit = _graph_edit
-
-	_panel_vbox.add_child(_node_spawn_button)
-
-
-func _on_selection_panel_gui_input(event) -> void:
-	pass

@@ -11,50 +11,15 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_muj4c")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-layout_mode = 2
-
-[node name="SelectionPanel" type="PanelContainer" parent="HBoxContainer"]
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-
-[node name="PanelVBox" type="VBoxContainer" parent="HBoxContainer/SelectionPanel"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="PanelTitle" type="Label" parent="HBoxContainer/SelectionPanel/PanelVBox"]
-layout_mode = 2
-text = "SelectionPanel"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="AddSceneButton" type="Button" parent="HBoxContainer/SelectionPanel/PanelVBox"]
-layout_mode = 2
-text = "Add Scene"
-
-[node name="FileDialog" type="FileDialog" parent="HBoxContainer/SelectionPanel/PanelVBox/AddSceneButton"]
-unique_name_in_owner = true
-title = "Open a File"
-initial_position = 2
-size = Vector2i(392, 162)
-ok_button_text = "Open"
-file_mode = 0
-root_subfolder = "addons/treehave/preset_nodes"
-filters = PackedStringArray("*.tscn")
-
-[node name="GraphEdit" type="GraphEdit" parent="HBoxContainer"]
+[node name="GraphEdit" type="GraphEdit" parent="."]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
-size_flags_horizontal = 3
 connection_lines_curvature = 0.0
 connection_lines_thickness = 0.0
 connection_lines_antialiased = false
 arrange_nodes_button_hidden = true
 script = ExtResource("2_p620u")
 
-[connection signal="gui_input" from="HBoxContainer/SelectionPanel" to="." method="_on_selection_panel_gui_input"]
-[connection signal="pressed" from="HBoxContainer/SelectionPanel/PanelVBox/AddSceneButton" to="." method="_on_add_scene_button_pressed"]
-[connection signal="file_selected" from="HBoxContainer/SelectionPanel/PanelVBox/AddSceneButton/FileDialog" to="." method="_on_file_dialog_file_selected"]
-[connection signal="delete_nodes_request" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
-[connection signal="gui_input" from="HBoxContainer/GraphEdit" to="." method="_on_graph_edit_gui_input"]
+[connection signal="delete_nodes_request" from="GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
+[connection signal="gui_input" from="GraphEdit" to="." method="_on_graph_edit_gui_input"]
