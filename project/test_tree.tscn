@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://dste013djswut"]
+[gd_scene load_steps=6 format=3 uid="uid://dste013djswut"]
 
 [ext_resource type="Script" path="res://addons/beehave/nodes/beehave_tree.gd" id="1_c5662"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/composites/sequence.gd" id="2_e2uvp"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/leaves/action.gd" id="3_ge8le"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/leaves/condition.gd" id="4_0dcfv"]
+[ext_resource type="Script" path="res://addons/beehave/nodes/decorators/inverter.gd" id="5_8egyx"]
 
 [node name="TestTree" type="Node"]
 script = ExtResource("1_c5662")
@@ -17,23 +18,35 @@ script = ExtResource("2_e2uvp")
 [node name="SequenceComposite" type="Node" parent="SequenceComposite/SequenceComposite"]
 script = ExtResource("2_e2uvp")
 
+[node name="ActionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite"]
+script = ExtResource("3_ge8le")
+
+[node name="ConditionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite"]
+script = ExtResource("4_0dcfv")
+
+[node name="ActionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite"]
+script = ExtResource("3_ge8le")
+
+[node name="ConditionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite"]
+script = ExtResource("4_0dcfv")
+
+[node name="ActionLeaf" type="Node" parent="SequenceComposite/SequenceComposite"]
+script = ExtResource("3_ge8le")
+
 [node name="SequenceComposite2" type="Node" parent="SequenceComposite/SequenceComposite"]
 script = ExtResource("2_e2uvp")
 
-[node name="SequenceComposite3" type="Node" parent="SequenceComposite/SequenceComposite"]
-script = ExtResource("2_e2uvp")
-
-[node name="ActionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
+[node name="ActionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite2"]
 script = ExtResource("3_ge8le")
 
-[node name="ConditionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
+[node name="ConditionLeaf" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite2"]
 script = ExtResource("4_0dcfv")
 
-[node name="ActionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
+[node name="ActionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite2"]
 script = ExtResource("3_ge8le")
 
-[node name="ConditionLeaf2" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite3"]
-script = ExtResource("4_0dcfv")
+[node name="InverterDecorator" type="Node" parent="SequenceComposite"]
+script = ExtResource("5_8egyx")
 
-[node name="SequenceComposite2" type="Node" parent="SequenceComposite"]
-script = ExtResource("2_e2uvp")
+[node name="ConditionLeaf" type="Node" parent="SequenceComposite/InverterDecorator"]
+script = ExtResource("4_0dcfv")
