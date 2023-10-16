@@ -26,29 +26,37 @@ func _clear_current_graph()->void:
 
 func _build_current_tree_graph()->void:
 	# Translates the beehave tree represented by _current_behavior_tree into a graph.
-	var root_node := _create_graph_node(_current_behavior_tree, 0, 0)
+	var root_node := _create_graph_node(_current_behavior_tree)
 	_add_graph_for_children(_current_behavior_tree, root_node, 1)
 
 
-func _add_graph_for_children(root:Node, parent_graph:GraphNode, tree_level: int)->void:
+func _add_graph_for_children(root: Node, parent_graph: GraphNode, tree_level: int)->void:
 	# For each child of root, create a graph node and connect it to parent_graph
-	# that last part's not implemented yet
-	for child in root.get_children():
-		var child_number = child.get_index()
 
-		var graph_node := _create_graph_node(child, tree_level, child_number)
+	for child in root.get_children():
+		var graph_node := _create_graph_node(child)
+
 		_graph_edit.connect_node(parent_graph.name, 0, graph_node.name, 0)
+
+		var child_number = child.get_index()
+		_set_graph_node_position(graph_node, child_number, tree_level, parent_graph.get_position_offset())
+
 		_add_graph_for_children(child, graph_node, tree_level + 1)
 
 
-func _create_graph_node(from: Node, tree_level: int, child_number: int)->GraphNode:
+func _create_graph_node(from: Node)->GraphNode:
 	# Create a new graph node with the same name and title as "from" and return it
-	var graph_node : GraphNode = _graph_node_preset.instantiate()
+	var graph_node := _graph_node_preset.instantiate()
 	graph_node.title = from.name
 	graph_node.set_name(from.name)
 	_graph_edit.add_child(graph_node)
-	graph_node.set_position_offset(Vector2(child_number * 200.0, tree_level * 150.0))
 	return graph_node
+
+
+func _set_graph_node_position(graph_node: GraphNode, child_number: int, tree_level: int, parent_position_offset: Vector2)-> void:
+	var x_offset = parent_position_offset.x + child_number * 200.0
+	var y_offset = tree_level * 150.0
+	graph_node.set_position_offset(Vector2(x_offset, y_offset))
 
 
 func _on_graph_edit_connection_request(from_node: StringName, from_port: int, to_node: StringName, to_port: int) -> void:
