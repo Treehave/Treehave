@@ -7,11 +7,11 @@ title = "GraphNodePreset"
 show_close = true
 slot/0/left_enabled = true
 slot/0/left_type = 1
-slot/0/left_color = Color(0.992157, 0.556863, 0.196078, 1)
+slot/0/left_color = Color(0.992157, 0.556863, 0.196078, 0)
 slot/0/left_icon = null
 slot/0/right_enabled = true
 slot/0/right_type = 1
-slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_color = Color(1, 1, 1, 0)
 slot/0/right_icon = null
 slot/0/draw_stylebox = true
 
