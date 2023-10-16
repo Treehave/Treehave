@@ -24,4 +24,7 @@ func _draw():
 
 
 func _calculate_center_position(control: Control) -> Vector2:
-	return control.position + (control.size / 2 * zoom)
+	if control != null:
+		return control.position + (control.size / 2 * zoom)
+
+	return Vector2.ZERO

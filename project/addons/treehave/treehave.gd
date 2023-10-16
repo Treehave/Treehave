@@ -26,25 +26,28 @@ func _clear_current_graph()->void:
 
 func _build_current_tree_graph()->void:
 	# Translates the beehave tree represented by _current_behavior_tree into a graph.
-	var root_node := _create_graph_node(_current_behavior_tree)
-	_add_graph_for_children(_current_behavior_tree, root_node)
+	var root_node := _create_graph_node(_current_behavior_tree, 0, 0)
+	_add_graph_for_children(_current_behavior_tree, root_node, 1)
 
 
-func _add_graph_for_children(root:Node, parent_graph:GraphNode)->void:
+func _add_graph_for_children(root:Node, parent_graph:GraphNode, tree_level: int)->void:
 	# For each child of root, create a graph node and connect it to parent_graph
 	# that last part's not implemented yet
 	for child in root.get_children():
-		var graph_node := _create_graph_node(child)
+		var child_number = child.get_index()
+
+		var graph_node := _create_graph_node(child, tree_level, child_number)
 		_graph_edit.connect_node(parent_graph.name, 0, graph_node.name, 0)
-		_add_graph_for_children(child, graph_node)
+		_add_graph_for_children(child, graph_node, tree_level + 1)
 
 
-func _create_graph_node(from:Node)->GraphNode:
+func _create_graph_node(from: Node, tree_level: int, child_number: int)->GraphNode:
 	# Create a new graph node with the same name and title as "from" and return it
-	var graph_node := _graph_node_preset.instantiate()
+	var graph_node : GraphNode = _graph_node_preset.instantiate()
 	graph_node.title = from.name
 	graph_node.set_name(from.name)
 	_graph_edit.add_child(graph_node)
+	graph_node.set_position_offset(Vector2(child_number * 200.0, tree_level * 150.0))
 	return graph_node
 
 
