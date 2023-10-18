@@ -20,6 +20,10 @@ func set_tree(tree: BeehaveTree) -> void:
 	_arrange_current_tree_graph()
 
 
+func set_selected(node: Node) -> void:
+	_get_graph_node(node).selected = true
+
+
 func _clear_current_graph() -> void:
 	_node_to_graph_node_map.clear()
 	_graph_edit.clear_connections()

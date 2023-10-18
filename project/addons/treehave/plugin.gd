@@ -28,6 +28,15 @@ func _on_selection_changed()->void:
 	if selected_object is BeehaveTree:
 		dock.set_tree(selected_object)
 
+	if selected_object is BeehaveNode:
+		var tree := selected_object.get_parent()
+
+		while not tree is BeehaveTree:
+			tree = tree.get_parent()
+
+		dock.set_tree(tree)
+		dock.set_selected(selected_object)
+
 
 func _exit_tree():
 	# Clean-up of the plugin goes here.
