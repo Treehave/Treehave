@@ -55,6 +55,7 @@ func _create_graph_node(from: Node) -> GraphNode:
 	# Create a new graph node with the same name and title as "from" and return it
 	var graph_node := _graph_node_preset.instantiate()
 	graph_node.title = from.name
+	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
 	graph_node.set_name(from.name)
 	_graph_edit.add_child(graph_node)
 	_node_to_graph_node_map[from] = graph_node
@@ -125,6 +126,31 @@ func _get_node_width(node: Node, depth := -1) -> int:
 		width += _get_node_width(child, depth - 1)
 
 	return width
+
+
+func _get_node_script_icon(node: Node) -> ImageTexture:
+	var script := node.get_script()
+	if script == null:
+		return null
+
+	var script_map := ProjectSettings.get_global_class_list()
+	var icon_path: String = ""
+
+	while icon_path == "" and script != null:
+		for i in range(0, script_map.size()):
+			if script_map[i].path == script.get_path():
+				icon_path = script_map[i].icon
+				break
+
+		script = script.get_base_script()
+
+	if icon_path == "":
+		return null
+
+	var image := Image.load_from_file(icon_path)
+	var texture := ImageTexture.create_from_image(image)
+
+	return texture
 
 
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
