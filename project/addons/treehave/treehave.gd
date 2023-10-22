@@ -9,9 +9,10 @@ var _graph_node_preset := preload(
 				"res://addons/treehave/preset_nodes/graph_node_preset.tscn")
 var _current_behavior_tree: BeehaveTree
 
-var _node_to_graph_node_map: Dictionary = {}
+var _node_graph_node_map: Dictionary = {}
 
 @onready var _graph_edit: GraphEdit = %GraphEdit
+
 
 func set_tree(tree: BeehaveTree) -> void:
 	_current_behavior_tree = tree
@@ -25,7 +26,7 @@ func set_selected(node: Node) -> void:
 
 
 func _clear_current_graph() -> void:
-	_node_to_graph_node_map.clear()
+	_node_graph_node_map.clear()
 	_graph_edit.clear_connections()
 	# Delete all children of the GraphEdit.
 	for node in _graph_edit.get_children():
@@ -33,7 +34,11 @@ func _clear_current_graph() -> void:
 
 
 func _get_graph_node(node: Node) -> GraphNode:
-	return _node_to_graph_node_map[node]
+	return _node_graph_node_map[node]
+
+
+func _get_node(graph_node: GraphNode) -> Node:
+	return _node_graph_node_map[graph_node]
 
 
 func _build_current_tree_graph() -> void:
@@ -62,9 +67,37 @@ func _create_graph_node(from: Node) -> GraphNode:
 	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
 	graph_node.set_name(from.name)
 	_graph_edit.add_child(graph_node)
-	_node_to_graph_node_map[from] = graph_node
+	_node_graph_node_map[from] = graph_node
+	_node_graph_node_map[graph_node] = from
+
+	graph_node.close_request.connect(_on_graph_node_delete_request.bind(graph_node))
 
 	return graph_node
+
+
+func _delete_graph_node(graph_node: GraphNode) -> void:
+	var node = _get_node(graph_node)
+
+	if node is BeehaveTree:
+		return
+
+	for child in node.get_children():
+		_delete_graph_node(_get_graph_node(child))
+
+	_node_graph_node_map.erase(node)
+	_node_graph_node_map.erase(graph_node)
+
+	_remove_all_connections(graph_node)
+
+	node.queue_free()
+	graph_node.queue_free()
+
+
+func _remove_all_connections(graph_node: GraphNode) -> void:
+	var connections := _graph_edit.get_connection_list()
+	for connection in connections:
+		if connection.from == graph_node.name or connection.to == graph_node.name:
+			_graph_edit.disconnect_node(connection.from, connection.from_port, connection.to, connection.to_port)
 
 
 func _arrange_current_tree_graph() -> void:
@@ -159,7 +192,11 @@ func _get_node_script_icon(node: Node) -> ImageTexture:
 
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	for node_name in nodes:
-		_graph_edit.get_node(str(node_name)).queue_free()
+		_delete_graph_node(_graph_edit.get_node(str(node_name)))
+
+
+func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
+	_delete_graph_node(graph_node)
 
 
 func _on_graph_edit_gui_input(event) -> void:
