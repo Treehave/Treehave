@@ -1,10 +1,11 @@
 @tool
-extends Control
+extends PanelContainer
 
 
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
 
+var editor_interface: EditorInterface
 var _graph_node_preset := preload(
 				"res://addons/treehave/preset_nodes/graph_node_preset.tscn")
 var _current_behavior_tree: BeehaveTree
@@ -61,11 +62,12 @@ func _build_graph_node(node: Node) -> void:
 
 
 func _create_graph_node(from: Node) -> GraphNode:
-	# Create a new graph node with the same name and title as "from" and return it
+	# Create a new graph node with the same name and title as "from,"
+	# store a reference to the node it's being created from, and return it
 	var graph_node := _graph_node_preset.instantiate()
+	graph_node.set_name(str(_current_behavior_tree.get_path_to(from)))
 	graph_node.title = from.name
 	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
-	graph_node.set_name(from.name)
 	_graph_edit.add_child(graph_node)
 	_node_graph_node_map[from] = graph_node
 	_node_graph_node_map[graph_node] = from
