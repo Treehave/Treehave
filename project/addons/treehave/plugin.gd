@@ -70,8 +70,7 @@ func _on_graph_node_selected(node: GraphNode)->void:
 	if node_path_from_name == "/":
 		editor_selection.add_node(_current_behavior_tree)
 		return
-	
-	
+
 	var selected_node := _current_behavior_tree.get_node(NodePath(node.name.replace("_", "/")))
 	editor_selection.add_node(selected_node)
 	dock.selected_tree_node = selected_node
