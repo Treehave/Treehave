@@ -23,9 +23,22 @@ slot/0/right_type = 1
 slot/0/right_color = Color(1, 1, 1, 0)
 slot/0/right_icon = null
 slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
 
 [node name="Icon" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 1

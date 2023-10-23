@@ -157,6 +157,7 @@ func _create_graph_node(from: Node) -> GraphNode:
 	var graph_node := _graph_node_preset.instantiate()
 	graph_node.title = from.name
 	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
+	graph_node.get_node("Label").text = "\n".join(from._get_configuration_warnings())
 	_graph_edit.add_child(graph_node)
 	_node_graph_node_map[from] = graph_node
 
