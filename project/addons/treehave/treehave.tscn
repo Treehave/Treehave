@@ -21,8 +21,6 @@ connection_lines_antialiased = false
 arrange_nodes_button_hidden = true
 script = ExtResource("2_p620u")
 
-[node name="PopupMenu" type="PopupMenu" parent="GraphEdit"]
-
 [connection signal="delete_nodes_request" from="GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
 [connection signal="gui_input" from="GraphEdit" to="." method="_on_graph_edit_gui_input"]
 [connection signal="mouse_entered" from="GraphEdit" to="." method="_on_graph_edit_mouse_entered"]

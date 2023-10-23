@@ -36,6 +36,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _popup_graph_node_menu() -> void:
+	if selected_tree_node == null:
+		return
+	
 	var menu := PopupMenu.new()
 	add_child(menu)
 	
