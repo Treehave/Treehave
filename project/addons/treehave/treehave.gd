@@ -39,7 +39,7 @@ func _get_graph_node(node: Node) -> GraphNode:
 
 
 func _get_node(graph_node: GraphNode) -> Node:
-	return _node_graph_node_map[graph_node]
+	return _node_graph_node_map.find_key(graph_node)
 
 
 func _build_current_tree_graph() -> void:
@@ -70,7 +70,6 @@ func _create_graph_node(from: Node) -> GraphNode:
 	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
 	_graph_edit.add_child(graph_node)
 	_node_graph_node_map[from] = graph_node
-	_node_graph_node_map[graph_node] = from
 
 	graph_node.close_request.connect(_on_graph_node_delete_request.bind(graph_node))
 
