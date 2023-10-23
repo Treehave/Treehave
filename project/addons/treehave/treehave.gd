@@ -275,10 +275,7 @@ func _get_node_script_icon(node: Node) -> ImageTexture:
 	if icon_path == "":
 		return null
 
-	var image := Image.load_from_file(icon_path)
-	var texture := ImageTexture.create_from_image(image)
-
-	return texture
+	return load(icon_path)
 
 
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
