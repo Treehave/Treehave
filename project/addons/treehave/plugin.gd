@@ -16,7 +16,7 @@ func _enter_tree():
 	# Load the dock scene and instantiate it.
 	dock = preload("res://addons/treehave/treehave.tscn").instantiate()
 	dock.editor_interface = get_editor_interface()
-	dock.find_child("GraphEdit").connect("node_selected", self._on_graph_node_selected)
+	dock.find_child("GraphEdit").connect("node_selected", _on_graph_node_selected)
 	_editor_interface.get_selection().selection_changed.connect(_on_selection_changed)
 
 	# Add the loaded scene to the docks.
@@ -58,8 +58,6 @@ func _on_graph_node_selected(node: GraphNode)->void:
 		is_selected_in_editor = false
 		return
 
-	print(node.name)
-
 	is_selected_in_graph_edit = true
 
 	var editor_selection: EditorSelection = _editor_interface.get_selection()
@@ -71,8 +69,10 @@ func _on_graph_node_selected(node: GraphNode)->void:
 		editor_selection.add_node(_current_behavior_tree)
 		return
 	
-	editor_selection.add_node(_current_behavior_tree.get_node(
-								NodePath(node.name.replace("_", "/"))))
+	
+	var selected_node := _current_behavior_tree.get_node(NodePath(node.name.replace("_", "/")))
+	editor_selection.add_node(selected_node)
+	dock.selected_tree_node = selected_node
 
 
 func _exit_tree():

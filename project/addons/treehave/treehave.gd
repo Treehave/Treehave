@@ -4,6 +4,15 @@ extends PanelContainer
 
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
+const GRAPH_MENU_ACTIONS := ["Add Node"]
+const BEEHAVE_NODES_TO_EXCLUDE := [
+	"res://addons/beehave/nodes/leaves/action.gd",
+	"res://addons/beehave/nodes/leaves/condition.gd",
+	"res://addons/beehave/nodes/leaves/leaf.gd",
+	"res://addons/beehave/nodes/decorators/decorator.gd",
+	"res://addons/beehave/nodes/composites/composite.gd",
+	"res://addons/beehave/nodes/beehave_node.gd",
+]
 
 var editor_interface: EditorInterface
 var _graph_node_preset := preload(
@@ -11,8 +20,85 @@ var _graph_node_preset := preload(
 var _current_behavior_tree: BeehaveTree
 
 var _node_graph_node_map: Dictionary = {}
+var selected_tree_node: Node
+var _is_treehave_panel_hovered := false
 
 @onready var _graph_edit: GraphEdit = %GraphEdit
+
+
+func _input(event: InputEvent) -> void:
+	if not _is_treehave_panel_hovered:
+		return
+	
+	if event is InputEventMouseButton:
+		if event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
+			_popup_graph_node_menu()
+
+
+func _popup_graph_node_menu() -> void:
+	var menu := PopupMenu.new()
+	add_child(menu)
+	
+	for action in GRAPH_MENU_ACTIONS:
+		menu.add_item(action)
+	
+	menu.position = get_global_mouse_position()
+	menu.popup()
+	
+	menu.index_pressed.connect(_on_graph_node_menu_index_pressed.bind(menu))
+
+
+func _popup_add_node_menu() -> void:
+	var menu := PopupMenu.new()
+	add_child(menu)
+	
+	for file_path in _get_gd_files_in_directory(editor_interface.get_resource_filesystem().get_filesystem()):
+		if load(file_path).new() is BeehaveNode and not BEEHAVE_NODES_TO_EXCLUDE.has(file_path):
+			var id := menu.item_count
+			menu.add_item(_get_name_from_path(file_path), id)
+			menu.set_item_metadata(id, file_path)
+	
+	menu.popup_centered()
+	
+	menu.index_pressed.connect(_on_add_node_menu_index_pressed.bind(menu))
+
+
+func _get_gd_files_in_directory(directory:EditorFileSystemDirectory) -> Array[String]:
+	var paths: Array[String] = []
+	
+	for file_index in directory.get_file_count():
+		if directory.get_file_type(file_index) == "GDScript":
+			paths.append(directory.get_file_path(file_index))
+	for dir_index in directory.get_subdir_count():
+		paths.append_array(_get_gd_files_in_directory(directory.get_subdir(dir_index)))
+	
+	return paths
+
+
+func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
+	match menu.get_item_text(index):
+		"Add Node":
+			_popup_add_node_menu()
+	menu.queue_free()
+
+
+func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
+	var node_path: String = menu.get_item_metadata(index)
+	
+	var new_tree_node : BeehaveNode = load(node_path).new()
+	new_tree_node.name = _get_name_from_path(node_path)
+	selected_tree_node.add_child(new_tree_node)
+	new_tree_node.owner = _current_behavior_tree
+	
+	_build_graph_node(new_tree_node)
+	
+	_arrange_current_tree_graph()
+	
+	menu.queue_free()
+
+
+func _get_name_from_path(path: String) -> String:
+	return path.get_basename().get_file().capitalize()
 
 
 func set_tree(tree: BeehaveTree) -> void:
@@ -203,3 +289,11 @@ func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
 func _on_graph_edit_gui_input(event) -> void:
 	if not event is InputEventMouseButton or not event.button_index == 2 or not event.pressed:
 		return
+
+
+func _on_graph_edit_mouse_entered() -> void:
+	_is_treehave_panel_hovered = true
+
+
+func _on_graph_edit_mouse_exited() -> void:
+	_is_treehave_panel_hovered = false
