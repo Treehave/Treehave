@@ -113,7 +113,7 @@ func set_tree(tree: BeehaveTree) -> void:
 
 
 func set_selected(node: Node) -> void:
-	_get_graph_node(node).selected = true
+	get_graph_node(node).selected = true
 
 
 func _clear_current_graph() -> void:
@@ -124,11 +124,11 @@ func _clear_current_graph() -> void:
 		node.queue_free()
 
 
-func _get_graph_node(node: Node) -> GraphNode:
+func get_graph_node(node: Node) -> GraphNode:
 	return _node_graph_node_map[node]
 
 
-func _get_node(graph_node: GraphNode) -> Node:
+func get_tree_node(graph_node: GraphNode) -> Node:
 	return _node_graph_node_map.find_key(graph_node)
 
 
@@ -142,7 +142,7 @@ func _build_graph_node(node: Node) -> void:
 	if node == null:
 		return
 
-	var parent_graph_node := _get_graph_node(node.get_parent())
+	var parent_graph_node := get_graph_node(node.get_parent())
 	var graph_node := _create_graph_node(node)
 
 	_graph_edit.connect_node(parent_graph_node.name, 0, graph_node.name, 0)
@@ -155,7 +155,6 @@ func _create_graph_node(from: Node) -> GraphNode:
 	# Create a new graph node with the same name and title as "from,"
 	# store a reference to the node it's being created from, and return it
 	var graph_node := _graph_node_preset.instantiate()
-	graph_node.set_name(str(_current_behavior_tree.get_path_to(from)))
 	graph_node.title = from.name
 	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
 	_graph_edit.add_child(graph_node)
@@ -167,13 +166,13 @@ func _create_graph_node(from: Node) -> GraphNode:
 
 
 func _delete_graph_node(graph_node: GraphNode) -> void:
-	var node = _get_node(graph_node)
+	var node = get_tree_node(graph_node)
 
 	if node is BeehaveTree:
 		return
 
 	for child in node.get_children():
-		_delete_graph_node(_get_graph_node(child))
+		_delete_graph_node(get_graph_node(child))
 
 	_node_graph_node_map.erase(node)
 	_node_graph_node_map.erase(graph_node)
@@ -215,8 +214,8 @@ func _arrange_graph_node(node: Node) -> void:
 
 func _set_graph_node_position(node: Node) -> void:
 	var parent_node := node.get_parent()
-	var graph_node := _get_graph_node(node)
-	var parent_graph_node := _get_graph_node(parent_node)
+	var graph_node := get_graph_node(node)
+	var parent_graph_node := get_graph_node(parent_node)
 	var sibling_index := parent_node.get_children().find(node)
 	var sibling_count := parent_node.get_child_count()
 	var width := _get_node_width(node)

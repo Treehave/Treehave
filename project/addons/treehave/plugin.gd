@@ -38,12 +38,8 @@ func _on_selection_changed()->void:
 
 	var selected_object := selected_objects[0]
 
-	if selected_object is BeehaveTree:
-		dock.set_tree(selected_object)
-		_current_behavior_tree = selected_object
-
-	if selected_object is BeehaveNode:
-		var tree := selected_object.get_parent()
+	if selected_object is BeehaveNode or selected_object is BeehaveTree:
+		var tree := selected_object
 
 		while not tree is BeehaveTree:
 			tree = tree.get_parent()
@@ -65,13 +61,7 @@ func _on_graph_node_selected(node: GraphNode)->void:
 	var editor_selection: EditorSelection = _editor_interface.get_selection()
 	editor_selection.clear()
 
-	var node_path_from_name = node.name.replace("_", "/")
-
-	if node_path_from_name == "/":
-		editor_selection.add_node(_current_behavior_tree)
-		return
-
-	var selected_node := _current_behavior_tree.get_node(NodePath(node.name.replace("_", "/")))
+	var selected_node = dock.get_tree_node(node)
 	editor_selection.add_node(selected_node)
 	dock.selected_tree_node = selected_node
 
