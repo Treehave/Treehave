@@ -51,6 +51,8 @@ func _on_selection_changed()->void:
 		dock.set_tree(tree)
 		dock.set_selected(selected_object)
 		_current_behavior_tree = tree
+	
+	dock.selected_tree_node = selected_object
 
 
 func _on_graph_node_selected(node: GraphNode)->void:
