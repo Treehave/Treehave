@@ -162,6 +162,7 @@ func _create_graph_node(from: Node) -> GraphNode:
 	_node_graph_node_map[from] = graph_node
 
 	graph_node.close_request.connect(_on_graph_node_delete_request.bind(graph_node))
+	graph_node.dragged.connect(_on_graph_node_dragged.bind(graph_node))
 
 	return graph_node
 
@@ -278,6 +279,28 @@ func _get_node_script_icon(node: Node) -> ImageTexture:
 	return load(icon_path)
 
 
+func _reorder_nodes(parent: Node) -> void:
+	var child_order := parent.get_children()
+	child_order.sort_custom(
+		func (a: Node, b: Node): 
+			return get_graph_node(a).position_offset.x < get_graph_node(b).position_offset.x
+	)
+
+	_reorder_node_siblings(child_order)
+
+	_arrange_current_tree_graph()
+
+
+func _reorder_node_siblings(node_array: Array[Node]) -> void:
+	for node in node_array:
+		var parent := node.get_parent()
+		parent.remove_child(node)
+		parent.add_child(node)
+		node.owner = _current_behavior_tree
+
+		_reorder_node_siblings(node.get_children())
+
+
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	for node_name in nodes:
 		_delete_graph_node(_graph_edit.get_node(str(node_name)))
@@ -285,6 +308,10 @@ func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 
 func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
 	_delete_graph_node(graph_node)
+
+
+func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode) -> void:
+	_reorder_nodes(get_tree_node(graph_node).get_parent())
 
 
 func _on_graph_edit_gui_input(event) -> void:
