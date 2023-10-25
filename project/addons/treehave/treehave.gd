@@ -15,8 +15,6 @@ const BEEHAVE_NODES_TO_EXCLUDE := [
 ]
 
 var editor_interface: EditorInterface
-var _graph_node_preset := preload(
-				"res://addons/treehave/preset_nodes/graph_node_preset.tscn")
 var _current_behavior_tree: BeehaveTree
 
 var _node_graph_node_map: Dictionary = {}
@@ -144,7 +142,7 @@ func _build_graph_node(node: Node) -> void:
 
 	var parent_graph_node := get_graph_node(node.get_parent())
 	var graph_node := _create_graph_node(node)
-
+	
 	_graph_edit.connect_node(parent_graph_node.name, 0, graph_node.name, 0)
 
 	for child in node.get_children():
@@ -154,10 +152,10 @@ func _build_graph_node(node: Node) -> void:
 func _create_graph_node(from: Node) -> GraphNode:
 	# Create a new graph node with the same name and title as "from,"
 	# store a reference to the node it's being created from, and return it
-	var graph_node := _graph_node_preset.instantiate()
+	var graph_node := TreehaveGraphNode.new()
 	graph_node.title = from.name
-	graph_node.get_node("Icon").texture = _get_node_script_icon(from)
-	graph_node.get_node("Label").text = "\n".join(from._get_configuration_warnings())
+	graph_node.add_texture_rect(_get_node_script_icon(from))
+	graph_node.add_label("\n".join(from._get_configuration_warnings()))
 	_graph_edit.add_child(graph_node)
 	_node_graph_node_map[from] = graph_node
 
