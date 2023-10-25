@@ -141,19 +141,33 @@ func _build_graph_node(node: Node) -> void:
 		return
 
 	var parent_graph_node := get_graph_node(node.get_parent())
-	var graph_node := _create_graph_node(node)
+	var graph_node: GraphNode
+	if node is Decorator:
+		if node.get_child_count() > 0:
+			graph_node = _create_graph_node(node.get_child(0), node)
+	else:
+		graph_node = _create_graph_node(node)
 	
 	_graph_edit.connect_node(parent_graph_node.name, 0, graph_node.name, 0)
 
-	for child in node.get_children():
-		_build_graph_node(child)
+	if node is Decorator:
+		for child in node.get_child(0).get_children():
+			_build_graph_node(child)
+	else:
+		for child in node.get_children():
+			_build_graph_node(child)
 
 
-func _create_graph_node(from: Node) -> GraphNode:
+func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 	# Create a new graph node with the same name and title as "from,"
 	# store a reference to the node it's being created from, and return it
 	var graph_node := TreehaveGraphNode.new()
 	graph_node.title = from.name
+	
+	if decorator != null:
+		graph_node.decorate(decorator.name, _get_node_script_icon(decorator))
+		_node_graph_node_map[decorator] = graph_node
+	
 	graph_node.add_texture_rect(_get_node_script_icon(from))
 	graph_node.add_label("\n".join(from._get_configuration_warnings()))
 	_graph_edit.add_child(graph_node)

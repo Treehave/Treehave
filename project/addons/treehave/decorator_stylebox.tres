@@ -1,3 +1,4 @@
 [gd_resource type="StyleBoxFlat" format=3 uid="uid://bgo082cg40dvh"]
 
 [resource]
+border_width_left = 18
