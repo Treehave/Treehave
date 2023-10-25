@@ -4,7 +4,6 @@ extends PanelContainer
 
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
-const GRAPH_MENU_ACTIONS := ["Add Node"]
 const BEEHAVE_NODES_TO_EXCLUDE := [
 	"res://addons/beehave/nodes/leaves/action.gd",
 	"res://addons/beehave/nodes/leaves/condition.gd",
@@ -34,13 +33,13 @@ func _input(event: InputEvent) -> void:
 
 
 func _popup_graph_node_menu() -> void:
-	if selected_tree_node == null or selected_tree_node is Leaf or selected_tree_node is Leaf:
+	if selected_tree_node == null:
 		return
 
 	var menu := PopupMenu.new()
 	add_child(menu)
 
-	for action in GRAPH_MENU_ACTIONS:
+	for action in _get_possible_actions(selected_tree_node):
 		menu.add_item(action)
 
 	menu.position = get_global_mouse_position()
@@ -49,15 +48,28 @@ func _popup_graph_node_menu() -> void:
 	menu.index_pressed.connect(_on_graph_node_menu_index_pressed.bind(menu))
 
 
-func _popup_add_node_menu() -> void:
+func _get_possible_actions(node: Node) -> Array[String]:
+	# possible actions are Add Node and Add Decorator
+	var actions: Array[String] = ["Add Decorator"]
+	
+	if not node is Leaf:
+		actions.append("Add Node")
+	
+	actions.sort()
+	return actions
+
+
+func _popup_add_node_menu(action: String) -> void:
 	var menu := PopupMenu.new()
 	add_child(menu)
 
 	for file_path in _get_gd_files_in_directory(editor_interface.get_resource_filesystem().get_filesystem()):
-		if load(file_path).new() is BeehaveNode and not BEEHAVE_NODES_TO_EXCLUDE.has(file_path):
-			var id := menu.item_count
-			menu.add_item(_get_name_from_path(file_path), id)
-			menu.set_item_metadata(id, file_path)
+		var instance = load(file_path).new()
+		if instance is BeehaveNode and not BEEHAVE_NODES_TO_EXCLUDE.has(file_path):
+			if (action == "Add Node" and not instance is Decorator) or (action == "Add Decorator" and instance is Decorator):
+				var id := menu.item_count
+				menu.add_item(_get_name_from_path(file_path), id)
+				menu.set_item_metadata(id, file_path)
 
 	menu.popup_centered()
 
@@ -80,7 +92,9 @@ func _get_gd_files_in_directory(directory:EditorFileSystemDirectory) -> Array[St
 func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	match menu.get_item_text(index):
 		"Add Node":
-			_popup_add_node_menu()
+			_popup_add_node_menu("Add Node")
+		"Add Decorator":
+			_popup_add_node_menu("Add Decorator")
 	menu.queue_free()
 
 
@@ -89,14 +103,30 @@ func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 
 	var new_tree_node : BeehaveNode = load(node_path).new()
 	new_tree_node.name = _get_name_from_path(node_path)
-	selected_tree_node.add_child(new_tree_node)
+	
+	if new_tree_node is Decorator:
+		var current_index := selected_tree_node.get_index()
+		var parent_node := selected_tree_node.get_parent()
+		parent_node.add_child(new_tree_node)
+		parent_node.move_child(new_tree_node, current_index)
+		selected_tree_node.reparent(new_tree_node)
+		_set_node_owner(parent_node)
+	else:
+		selected_tree_node.add_child(new_tree_node)
 	new_tree_node.owner = _current_behavior_tree
 
 	_build_graph_node(new_tree_node)
 
-	_arrange_current_tree_graph()
+	set_tree(_current_behavior_tree)
+	#_arrange_current_tree_graph()
 
 	menu.queue_free()
+
+
+func _set_node_owner(node: Node) -> void:
+	node.owner = _current_behavior_tree
+	for child in node.get_children():
+		_set_node_owner(child)
 
 
 func _get_name_from_path(path: String) -> String:
@@ -220,22 +250,40 @@ func _arrange_graph_node(node: Node) -> void:
 	while queue.size() > 0:
 		var current_node := queue.pop_front()
 
-		_set_graph_node_position(current_node)
-
+		if current_node is Decorator:
+			if current_node.get_child_count() > 0:
+				current_node = current_node.get_child(0)
+				_set_graph_node_position(current_node, true)
+		else:
+			_set_graph_node_position(current_node)
+		
 		for child in current_node.get_children():
 			queue.append(child)
 
 
-func _set_graph_node_position(node: Node) -> void:
+func _set_graph_node_position(node: Node, on_decorator := false) -> void:
 	var parent_node := node.get_parent()
+	
+	if on_decorator:
+		# because parent_node would be the decorator,
+		# and we need the decorator's parent instead.
+		parent_node = parent_node.get_parent()
+	
 	var graph_node := get_graph_node(node)
 	var parent_graph_node := get_graph_node(parent_node)
-	var sibling_index := parent_node.get_children().find(node)
+	var sibling_index := node.get_index()
+	
+	if on_decorator:
+		# because node.get_index() would be the node's index under the decorator,
+		# which is not what we need.
+		sibling_index = node.get_parent().get_index()
+	
 	var sibling_count := parent_node.get_child_count()
 	var width := _get_node_width(node)
 	var pre_width := 0
 	var post_width := 0
 	var parent_width := 0
+	
 
 	for i in range(0, sibling_index):
 		pre_width += _get_node_width(parent_node.get_child(i))

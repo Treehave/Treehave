@@ -4,8 +4,8 @@
 [ext_resource type="Script" path="res://addons/beehave/nodes/composites/sequence.gd" id="2_e2uvp"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/leaves/action.gd" id="3_ge8le"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/leaves/condition.gd" id="4_0dcfv"]
+[ext_resource type="Script" path="res://test_action.gd" id="5_02y3t"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/decorators/inverter.gd" id="5_8egyx"]
-[ext_resource type="Script" path="res://test_action.gd" id="5_kj6gx"]
 
 [node name="TestTree" type="Node"]
 script = ExtResource("1_c5662")
@@ -47,7 +47,7 @@ script = ExtResource("4_0dcfv")
 script = ExtResource("3_ge8le")
 
 [node name="TestAction" type="Node" parent="SequenceComposite/SequenceComposite/SequenceComposite2"]
-script = ExtResource("5_kj6gx")
+script = ExtResource("5_02y3t")
 
 [node name="InverterDecorator" type="Node" parent="SequenceComposite"]
 script = ExtResource("5_8egyx")
