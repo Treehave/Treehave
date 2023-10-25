@@ -49,11 +49,17 @@ func _popup_graph_node_menu() -> void:
 
 
 func _get_possible_actions(node: Node) -> Array[String]:
-	# possible actions are Add Node and Add Decorator
-	var actions: Array[String] = ["Add Decorator"]
+	# possible actions are Add Node, Add Decorator, and Remove Decorator
+	var actions: Array[String] = []
 	
 	if not node is Leaf:
 		actions.append("Add Node")
+	
+	if not node is Decorator:
+		if not get_graph_node(node).decorated:
+			actions.append("Add Decorator")
+	elif node is Decorator or get_graph_node(node).decorated:
+		actions.append("Remove Decorator")
 	
 	actions.sort()
 	return actions
@@ -95,7 +101,22 @@ func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 			_popup_add_node_menu("Add Node")
 		"Add Decorator":
 			_popup_add_node_menu("Add Decorator")
+		"Remove Decorator":
+			_remove_decorator()
 	menu.queue_free()
+
+
+func _remove_decorator() -> void:
+	var decorator := selected_tree_node if selected_tree_node is Decorator else selected_tree_node.get_parent()
+	var root := decorator.get_parent()
+	var branch := decorator.get_child(0)
+	var current_index := decorator.get_index()
+	branch.reparent(root)
+	root.move_child(branch, current_index)
+	_set_node_owner(branch)
+	decorator.queue_free()
+	
+	get_graph_node(branch).remove_decorator()
 
 
 func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
