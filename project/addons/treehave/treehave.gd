@@ -1,6 +1,8 @@
 @tool
 extends PanelContainer
 
+signal selection_updated(new_selection)
+
 
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
@@ -469,6 +471,8 @@ func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode)
 	_reorder_nodes(parent)
 
 	_store_last_graph_action("reorder_nodes", [parent, old_child_order])
+	_reorder_nodes(get_tree_node(graph_node).get_parent())
+	selection_updated.emit(graph_node)
 
 
 func _on_graph_edit_gui_input(event) -> void:
@@ -486,3 +490,7 @@ func _on_graph_edit_mouse_exited() -> void:
 
 func _on_undo_button_pressed():
 	_undo_last_graph_action()
+
+
+func _on_graph_edit_node_selected(node: GraphNode) -> void:
+	selection_updated.emit(node)

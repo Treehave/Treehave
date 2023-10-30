@@ -1,13 +1,10 @@
 @tool
 extends EditorPlugin
 
-
 # A class member to hold the dock during the plugin life cycle.
 var dock
 var _current_behavior_tree: BeehaveTree
 var _editor_interface: EditorInterface
-var is_selected_in_editor := false
-var is_selected_in_graph_edit := false
 
 
 func _enter_tree():
@@ -16,7 +13,7 @@ func _enter_tree():
 	# Load the dock scene and instantiate it.
 	dock = preload("res://addons/treehave/treehave.tscn").instantiate()
 	dock.editor_interface = get_editor_interface()
-	dock.find_child("GraphEdit").connect("node_selected", _on_graph_node_selected)
+	dock.selection_updated.connect(_on_graph_node_selected)
 	_editor_interface.get_selection().selection_changed.connect(_on_selection_changed)
 
 	# Add the loaded scene to the docks.
@@ -25,18 +22,17 @@ func _enter_tree():
 
 
 func _on_selection_changed()->void:
-	if is_selected_in_graph_edit:
-		is_selected_in_graph_edit = false
-		return
-
-	is_selected_in_editor = true
-	
 	var selected_objects := get_editor_interface().get_selection().get_selected_nodes()
-
+	
+	# ignore empty selections and multi selections
 	if not selected_objects.size() == 1:
 		return
 
 	var selected_object := selected_objects[0]
+	
+	if is_instance_valid(_current_behavior_tree):
+		if dock.get_graph_node(selected_object).selected:
+			return
 
 	if selected_object is BeehaveNode or selected_object is BeehaveTree:
 		var tree := selected_object
@@ -52,13 +48,11 @@ func _on_selection_changed()->void:
 
 
 func _on_graph_node_selected(node: GraphNode)->void:
-	if is_selected_in_editor:
-		is_selected_in_editor = false
-		return
-
-	is_selected_in_graph_edit = true
-
 	var editor_selection: EditorSelection = _editor_interface.get_selection()
+	
+	if editor_selection.get_selected_nodes().has(dock.get_tree_node(node)):
+		return
+	
 	editor_selection.clear()
 
 	var selected_node = dock.get_tree_node(node)
