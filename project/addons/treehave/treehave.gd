@@ -1,6 +1,8 @@
 @tool
 extends PanelContainer
 
+signal selection_updated(new_selection)
+
 
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
@@ -393,6 +395,7 @@ func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
 
 func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode) -> void:
 	_reorder_nodes(get_tree_node(graph_node).get_parent())
+	selection_updated.emit(graph_node)
 
 
 func _on_graph_edit_gui_input(event) -> void:
@@ -406,3 +409,7 @@ func _on_graph_edit_mouse_entered() -> void:
 
 func _on_graph_edit_mouse_exited() -> void:
 	_is_treehave_panel_hovered = false
+
+
+func _on_graph_edit_node_selected(node: GraphNode) -> void:
+	selection_updated.emit(node)

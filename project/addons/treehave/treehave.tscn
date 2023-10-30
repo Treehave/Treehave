@@ -25,3 +25,4 @@ script = ExtResource("2_p620u")
 [connection signal="gui_input" from="GraphEdit" to="." method="_on_graph_edit_gui_input"]
 [connection signal="mouse_entered" from="GraphEdit" to="." method="_on_graph_edit_mouse_entered"]
 [connection signal="mouse_exited" from="GraphEdit" to="." method="_on_graph_edit_mouse_exited"]
+[connection signal="node_selected" from="GraphEdit" to="." method="_on_graph_edit_node_selected"]
