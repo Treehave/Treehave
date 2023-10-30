@@ -7,6 +7,10 @@ var decorated := false
 func _ready()->void:
 	set_slot(0, true, 0, Color(0.0, 0.0, 0.0, 0.0), true, 0, Color(0.0, 0.0, 0.0, 0.0))
 
+	# Show close must be true or graph nodes cannot be deleted by the user within
+	# the graph view
+	show_close = true
+
 
 func decorate(decorator_name: String, icon: Texture2D) -> void:
 	if decorated:

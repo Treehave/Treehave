@@ -220,7 +220,7 @@ func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 	if decorator != null:
 		graph_node.decorate(decorator.name, _get_node_script_icon(decorator))
 		_node_graph_node_map[decorator] = graph_node
-	
+
 	graph_node.add_texture_rect(_get_node_script_icon(from))
 	graph_node.add_label("\n".join(from._get_configuration_warnings()))
 	_graph_edit.add_child(graph_node)
@@ -232,7 +232,7 @@ func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 	return graph_node
 
 
-func _delete_graph_node(graph_node: GraphNode, recursion_number) -> Array[Node]:
+func _delete_graph_node(graph_node: GraphNode, recursion_number) -> Array:
 	var nodes_removed := []
 	var node = get_tree_node(graph_node)
 
@@ -241,7 +241,7 @@ func _delete_graph_node(graph_node: GraphNode, recursion_number) -> Array[Node]:
 
 	for child in node.get_children():
 		# Append nodes removed from children
-		nodes_removed.append(_delete_graph_node(get_graph_node(child), recursion_number + 1))
+		nodes_removed.append_array(_delete_graph_node(get_graph_node(child), recursion_number + 1))
 
 	_node_graph_node_map.erase(node)
 	_node_graph_node_map.erase(graph_node)
@@ -420,7 +420,19 @@ func _undo_last_graph_action() -> void:
 	_arrange_current_tree_graph()
 
 func _reconstruct_tree(nodes_removed: Array) -> void:
-	pass
+	var nodes := []
+
+	for dictionary in nodes_removed:
+		var parent: Node = dictionary["parent_node"]
+		var node = dictionary["node"]
+		parent.add_child(node)
+		nodes.append(node)
+
+	# Second loop is necessary because setting node.owner must be done after all
+	# nodes have their parents assigned or some nodes will show up in the graph
+	# edit but will not show up properly in the scenetree.
+	for node in nodes:
+		node.owner = _current_behavior_tree
 
 
 # Works, but graph doesn't immediately update????
@@ -439,7 +451,7 @@ func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	var nodes_removed := []
 
 	for node_name in nodes:
-		nodes_removed.append(_delete_graph_node(_graph_edit.get_node(str(node_name)), 0))
+		nodes_removed.append_array(_delete_graph_node(_graph_edit.get_node(str(node_name)), 0))
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
