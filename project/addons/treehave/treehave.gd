@@ -20,6 +20,8 @@ var _node_graph_node_map: Dictionary = {}
 var selected_tree_node: Node
 var _is_treehave_panel_hovered := false
 
+var _previous_action_array: Array[Dictionary] = []
+
 @onready var _graph_edit: GraphEdit = %GraphEdit
 
 
@@ -230,22 +232,33 @@ func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 	return graph_node
 
 
-func _delete_graph_node(graph_node: GraphNode) -> void:
+func _delete_graph_node(graph_node: GraphNode, recursion_number) -> Array[Node]:
+	var nodes_removed := []
 	var node = get_tree_node(graph_node)
 
 	if node is BeehaveTree:
-		return
+		return []
 
 	for child in node.get_children():
-		_delete_graph_node(get_graph_node(child))
+		# Append nodes removed from children
+		nodes_removed.append(_delete_graph_node(get_graph_node(child), recursion_number + 1))
 
 	_node_graph_node_map.erase(node)
 	_node_graph_node_map.erase(graph_node)
 
 	_remove_all_connections(graph_node)
 
-	node.queue_free()
+	var node_parent := node.get_parent()
+
+	# Do not queue free the node. Nodes need to be saved for undo actions.
+	node_parent.remove_child(node)
 	graph_node.queue_free()
+
+	# Include parent node and node in dictionary so we can reconstruct the tree
+	# if action needs to be undone
+	nodes_removed.append({"parent_node": node_parent, "node": node})
+
+	return nodes_removed
 
 
 func _remove_all_connections(graph_node: GraphNode) -> void:
@@ -379,20 +392,71 @@ func _reorder_node_siblings(node_array: Array[Node]) -> void:
 		parent.add_child(node)
 		node.owner = _current_behavior_tree
 
+		# Action
 		_reorder_node_siblings(node.get_children())
 
 
+func _store_last_graph_action(action_name: String, reversal_values: Array) -> void:
+	var action_dictionary := {
+		"action": action_name,
+
+		"reversal_values": reversal_values
+		}
+
+	_previous_action_array.push_back(action_dictionary)
+
+
+func _undo_last_graph_action() -> void:
+	var action_dictionary: Dictionary = _previous_action_array.pop_back()
+	match action_dictionary["action"]:
+		"delete_nodes":
+			_reconstruct_tree(action_dictionary["reversal_values"])
+
+		"reorder_nodes":
+			_restore_node_order(action_dictionary["reversal_values"])
+
+	_clear_current_graph()
+	_build_current_tree_graph()
+	_arrange_current_tree_graph()
+
+func _reconstruct_tree(nodes_removed: Array) -> void:
+	pass
+
+
+# Works, but graph doesn't immediately update????
+func _restore_node_order(reorder_data: Array) -> void:
+	var parent: Node = reorder_data[0]
+	var old_child_order: Array[Node] = reorder_data[1]
+
+	# Remove all children and add them in their old order
+	for node in old_child_order:
+		parent.remove_child(node)
+		parent.add_child(node)
+		node.owner = _current_behavior_tree
+
+
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
+	var nodes_removed := []
+
 	for node_name in nodes:
-		_delete_graph_node(_graph_edit.get_node(str(node_name)))
+		nodes_removed.append(_delete_graph_node(_graph_edit.get_node(str(node_name)), 0))
+
+	_store_last_graph_action("delete_nodes", nodes_removed)
 
 
 func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
-	_delete_graph_node(graph_node)
+	var nodes_removed := _delete_graph_node(graph_node, 0)
+
+	_store_last_graph_action("delete_nodes", nodes_removed)
 
 
 func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode) -> void:
-	_reorder_nodes(get_tree_node(graph_node).get_parent())
+	var parent := get_tree_node(graph_node).get_parent()
+	var old_child_order := parent.get_children()
+
+	_reorder_nodes(parent)
+
+	_store_last_graph_action("reorder_nodes", [parent, old_child_order])
 
 
 func _on_graph_edit_gui_input(event) -> void:
@@ -406,3 +470,7 @@ func _on_graph_edit_mouse_entered() -> void:
 
 func _on_graph_edit_mouse_exited() -> void:
 	_is_treehave_panel_hovered = false
+
+
+func _on_undo_button_pressed():
+	_undo_last_graph_action()

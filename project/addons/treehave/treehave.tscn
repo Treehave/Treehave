@@ -11,17 +11,33 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_muj4c")
 
-[node name="GraphEdit" type="GraphEdit" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="MenuHBox" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="UndoButton" type="Button" parent="VBoxContainer/MenuHBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Undo Graph Action"
+
+[node name="GraphEdit" type="GraphEdit" parent="VBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
+size_flags_vertical = 3
+scroll_offset = Vector2(-67, -301.475)
 connection_lines_curvature = 0.0
 connection_lines_thickness = 0.0
 connection_lines_antialiased = false
 arrange_nodes_button_hidden = true
 script = ExtResource("2_p620u")
 
-[connection signal="delete_nodes_request" from="GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
-[connection signal="gui_input" from="GraphEdit" to="." method="_on_graph_edit_gui_input"]
-[connection signal="mouse_entered" from="GraphEdit" to="." method="_on_graph_edit_mouse_entered"]
-[connection signal="mouse_exited" from="GraphEdit" to="." method="_on_graph_edit_mouse_exited"]
+[connection signal="pressed" from="VBoxContainer/MenuHBox/UndoButton" to="." method="_on_undo_button_pressed"]
+[connection signal="delete_nodes_request" from="VBoxContainer/GraphEdit" to="." method="_on_graph_edit_delete_nodes_request"]
+[connection signal="gui_input" from="VBoxContainer/GraphEdit" to="." method="_on_graph_edit_gui_input"]
+[connection signal="mouse_entered" from="VBoxContainer/GraphEdit" to="." method="_on_graph_edit_mouse_entered"]
+[connection signal="mouse_exited" from="VBoxContainer/GraphEdit" to="." method="_on_graph_edit_mouse_exited"]
