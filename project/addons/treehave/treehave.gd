@@ -110,8 +110,8 @@ func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	menu.queue_free()
 
 
-func _remove_decorator() -> void:
-	var decorator := selected_tree_node if selected_tree_node is Decorator else selected_tree_node.get_parent()
+func _remove_decorator(on: Node = selected_tree_node) -> void:
+	var decorator := on if on is Decorator else on.get_parent()
 	var root := decorator.get_parent()
 	var branch := decorator.get_child(0)
 	var current_index := decorator.get_index()
@@ -230,6 +230,7 @@ func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 
 	graph_node.close_request.connect(_on_graph_node_delete_request.bind(graph_node))
 	graph_node.dragged.connect(_on_graph_node_dragged.bind(graph_node))
+	graph_node.remove_decorator_requested.connect(_on_graph_node_remove_decorator_requested.bind(graph_node))
 
 	return graph_node
 
@@ -409,6 +410,9 @@ func _store_last_graph_action(action_name: String, reversal_values: Array) -> vo
 
 
 func _undo_last_graph_action() -> void:
+	if _previous_action_array.size() == 0:
+		return
+
 	var action_dictionary: Dictionary = _previous_action_array.pop_back()
 	match action_dictionary["action"]:
 		"delete_nodes":
@@ -446,7 +450,7 @@ func _restore_node_order(reorder_data: Array) -> void:
 	for node in old_child_order:
 		parent.remove_child(node)
 		parent.add_child(node)
-		node.owner = _current_behavior_tree
+		_set_node_owner(node)
 
 
 func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
@@ -494,3 +498,7 @@ func _on_undo_button_pressed():
 
 func _on_graph_edit_node_selected(node: GraphNode) -> void:
 	selection_updated.emit(node)
+
+
+func _on_graph_node_remove_decorator_requested(graph_node: GraphNode) -> void:
+	_remove_decorator(get_tree_node(graph_node))
