@@ -55,16 +55,15 @@ func _popup_graph_node_menu() -> void:
 func _get_possible_actions(node: Node) -> Array[String]:
 	# possible actions are Add Node, Add Decorator, and Remove Decorator
 	var actions: Array[String] = []
-	
+
 	if not node is Leaf:
 		actions.append("Add Node")
-	
-	if not node is Decorator:
-		if not get_graph_node(node).decorated:
-			actions.append("Add Decorator")
-	elif node is Decorator or get_graph_node(node).decorated:
+
+	if not get_graph_node(node).decorated:
+		actions.append("Add Decorator")
+	else:
 		actions.append("Remove Decorator")
-	
+
 	actions.sort()
 	return actions
 
@@ -166,6 +165,9 @@ func set_tree(tree: BeehaveTree) -> void:
 
 
 func set_selected(node: Node) -> void:
+	if node == null:
+		return
+
 	get_graph_node(node).selected = true
 
 
@@ -178,7 +180,10 @@ func _clear_current_graph() -> void:
 
 
 func get_graph_node(node: Node) -> GraphNode:
-	return _node_graph_node_map[node]
+	if node is Decorator and node.get_child_count() > 0:
+		node = node.get_child(0)
+
+	return _node_graph_node_map.get(node)
 
 
 func get_tree_node(graph_node: GraphNode) -> Node:
@@ -221,7 +226,6 @@ func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 	
 	if decorator != null:
 		graph_node.decorate(decorator.name, _get_node_script_icon(decorator))
-		_node_graph_node_map[decorator] = graph_node
 
 	graph_node.add_texture_rect(_get_node_script_icon(from))
 	graph_node.add_label("\n".join(from._get_configuration_warnings()))
