@@ -25,7 +25,7 @@ func decorate(decorator: Decorator, icon: Texture2D) -> void:
 	panel_container.add_theme_stylebox_override("panel", preload("res://addons/treehave/decorator_stylebox.tres"))
 	add_child(panel_container)
 	move_child(panel_container, 0)
-	
+
 	_decorators[decorator] = panel_container
 
 

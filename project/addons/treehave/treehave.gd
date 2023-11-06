@@ -16,10 +16,10 @@ const BEEHAVE_NODES_TO_EXCLUDE := [
 ]
 
 var editor_interface: EditorInterface
-var _current_behavior_tree: BeehaveTree
-
-var _node_graph_node_map: Dictionary = {}
 var selected_tree_node: Node
+
+var _current_behavior_tree: BeehaveTree
+var _node_graph_node_map: Dictionary = {}
 var _is_treehave_panel_hovered := false
 
 var _previous_action_array: Array[Dictionary] = []
@@ -113,30 +113,28 @@ func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	menu.queue_free()
 
 
-func _remove_decorator(on: Node = selected_tree_node) -> void:
-	var decorator := on# if on is Decorator else on.get_parent()
-	
-	while not decorator is Decorator:
-		decorator = decorator.get_parent()
-	
+func _remove_decorator(node: Node = selected_tree_node) -> void:
+	while not node is Decorator:
+		node = node.get_parent()
+
+	var decorator: Decorator = node
 	var root := decorator.get_parent()
-	
 	var branch := decorator.get_child(0)
 	var current_index := decorator.get_index()
 	branch.reparent(root)
 	root.move_child(branch, current_index)
 	_set_node_owner(branch)
 	decorator.queue_free()
-	
+
 	get_graph_node(branch).remove_decorator(decorator)
 
 
 func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	var node_path: String = menu.get_item_metadata(index)
 
-	var new_tree_node : BeehaveNode = load(node_path).new()
+	var new_tree_node: BeehaveNode = load(node_path).new()
 	new_tree_node.name = _get_name_from_path(node_path)
-	
+
 	if new_tree_node is Decorator:
 		var current_index := selected_tree_node.get_index()
 		var parent_node := selected_tree_node.get_parent()
@@ -151,7 +149,6 @@ func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	_build_graph_node(new_tree_node)
 
 	set_tree(_current_behavior_tree)
-	#_arrange_current_tree_graph()
 
 	menu.queue_free()
 
@@ -209,19 +206,18 @@ func _build_graph_node(node: Node) -> void:
 	if node == null:
 		return
 
-#	var parent_graph_node := get_graph_node(node.get_parent())
 	var decorators: Array[Decorator] = []
 	var parent_node := node.get_parent()
-	
+
 	while parent_node is Decorator:
 		parent_node = parent_node.get_parent()
-	
+
 	while node is Decorator:
 		decorators.append(node)
-		if node.get_child_count() > 0:
-			node = node.get_child(0)
-		else:
+		if node.get_child_count() == 0:
 			return
+
+		node = node.get_child(0)
 
 	var graph_node := _create_graph_node(node, decorators)
 	var parent_graph_node := get_graph_node(parent_node)
@@ -237,7 +233,7 @@ func _create_graph_node(from: Node, decorators: Array[Decorator] = []) -> GraphN
 	# store a reference to the node it's being created from, and return it
 	var graph_node := TreehaveGraphNode.new()
 	graph_node.title = from.name
-	
+
 	# goes through decorators in reverse order so that they display correctly
 	decorators.reverse()
 	for decorator in decorators:
@@ -250,12 +246,12 @@ func _create_graph_node(from: Node, decorators: Array[Decorator] = []) -> GraphN
 
 	graph_node.close_request.connect(_on_graph_node_delete_request.bind(graph_node))
 	graph_node.dragged.connect(_on_graph_node_dragged.bind(graph_node))
-	graph_node.remove_decorator_requested.connect(_on_graph_node_remove_decorator_requested)
+	graph_node.remove_decorator_requested.connect(_remove_decorator)
 
 	return graph_node
 
 
-func _delete_graph_node(graph_node: GraphNode, recursion_number) -> Array:
+func _delete_graph_node(graph_node: GraphNode) -> Array:
 	var nodes_removed := []
 	var node = get_tree_node(graph_node)
 
@@ -264,7 +260,7 @@ func _delete_graph_node(graph_node: GraphNode, recursion_number) -> Array:
 
 	for child in node.get_children():
 		# Append nodes removed from children
-		nodes_removed.append_array(_delete_graph_node(get_graph_node(child), recursion_number + 1))
+		nodes_removed.append_array(_delete_graph_node(get_graph_node(child)))
 
 	_node_graph_node_map.erase(node)
 	_node_graph_node_map.erase(graph_node)
@@ -308,13 +304,13 @@ func _arrange_graph_node(node: Node) -> void:
 		var current_node := queue.pop_front()
 
 		while current_node is Decorator:
-			if current_node.get_child_count() > 0:
-				current_node = current_node.get_child(0)
-			else:
+			if current_node.get_child_count() == 0:
 				return
-		
+
+			current_node = current_node.get_child(0)
+
 		_set_graph_node_position(current_node)
-		
+
 		for child in current_node.get_children():
 			queue.append(child)
 
@@ -326,17 +322,16 @@ func _set_graph_node_position(node: Node) -> void:
 	while parent_node is Decorator:
 		child = parent_node
 		parent_node = parent_node.get_parent()
-	
+
 	var graph_node := get_graph_node(node)
 	var parent_graph_node := get_graph_node(parent_node)
 	var sibling_index := child.get_index()
-	
+
 	var sibling_count := parent_node.get_child_count()
 	var width := _get_node_width(node)
 	var pre_width := 0
 	var post_width := 0
 	var parent_width := 0
-	
 
 	for i in range(0, sibling_index):
 		pre_width += _get_node_width(parent_node.get_child(i))
@@ -358,23 +353,20 @@ func _set_graph_node_position(node: Node) -> void:
 	graph_node.set_position_offset(Vector2(final_x_offset, final_y_offset))
 
 
-func _get_node_width(node: Node, depth := -1) -> int:
-	if node == null or node.get_child_count() == 0 or depth == 0:
+func _get_node_width(node: Node) -> int:
+	if node == null or node.get_child_count() == 0:
 		return 1
 
 	var width := 0
 
 	for child in node.get_children():
-		width += _get_node_width(child, depth - 1)
+		width += _get_node_width(child)
 
 	return width
 
 
 func _get_node_script_icon(node: Node) -> ImageTexture:
 	var script := node.get_script()
-	if script == null:
-		return null
-
 	var script_map := ProjectSettings.get_global_class_list()
 	var icon_path: String = ""
 
@@ -395,7 +387,7 @@ func _get_node_script_icon(node: Node) -> ImageTexture:
 func _reorder_nodes(parent: Node) -> void:
 	var child_order := parent.get_children()
 	child_order.sort_custom(
-		func (a: Node, b: Node): 
+		func (a: Node, b: Node):
 			return get_graph_node(a).position_offset.x < get_graph_node(b).position_offset.x
 	)
 
@@ -407,24 +399,21 @@ func _reorder_node_siblings(node_array: Array[Node]) -> void:
 		var parent := node.get_parent()
 		parent.remove_child(node)
 		parent.add_child(node)
-		node.owner = _current_behavior_tree
 
-		# Action
-		_reorder_node_siblings(node.get_children())
+		_set_node_owner(node)
 
 
 func _store_last_graph_action(action_name: String, reversal_values: Array) -> void:
 	var action_dictionary := {
 		"action": action_name,
-
-		"reversal_values": reversal_values
-		}
+		"reversal_values": reversal_values,
+	}
 
 	_previous_action_array.push_back(action_dictionary)
 
 
 func _undo_last_graph_action() -> void:
-	if _previous_action_array.size() == 0:
+	if _previous_action_array.is_empty():
 		return
 
 	var action_dictionary: Dictionary = _previous_action_array.pop_back()
@@ -471,13 +460,13 @@ func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	var nodes_removed := []
 
 	for node_name in nodes:
-		nodes_removed.append_array(_delete_graph_node(_graph_edit.get_node(str(node_name)), 0))
+		nodes_removed.append_array(_delete_graph_node(_graph_edit.get_node(str(node_name))))
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
 
 func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
-	var nodes_removed := _delete_graph_node(graph_node, 0)
+	var nodes_removed := _delete_graph_node(graph_node)
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
@@ -491,11 +480,6 @@ func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode)
 	_store_last_graph_action("reorder_nodes", [parent, old_child_order])
 	_reorder_nodes(get_tree_node(graph_node).get_parent())
 	selection_updated.emit(graph_node)
-
-
-func _on_graph_edit_gui_input(event) -> void:
-	if not event is InputEventMouseButton or not event.button_index == 2 or not event.pressed:
-		return
 
 
 func _on_graph_edit_mouse_entered() -> void:
@@ -512,7 +496,3 @@ func _on_undo_button_pressed():
 
 func _on_graph_edit_node_selected(node: GraphNode) -> void:
 	selection_updated.emit(node)
-
-
-func _on_graph_node_remove_decorator_requested(decorator: Decorator) -> void:
-	_remove_decorator(decorator)

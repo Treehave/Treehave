@@ -31,7 +31,7 @@ func _draw():
 			elif node.name == connection.get("to"):
 				to_node = node
 		# Draw one line per connection
-		draw_line(_calculate_center_position(from_node), 
+		draw_line(_calculate_center_position(from_node),
 					_calculate_center_position(to_node), Color.BLUE, 5 * zoom, true)
 
 
