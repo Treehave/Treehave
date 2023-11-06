@@ -389,8 +389,6 @@ func _reorder_nodes(parent: Node) -> void:
 
 	_reorder_node_siblings(child_order)
 
-	_arrange_current_tree_graph()
-
 
 func _reorder_node_siblings(node_array: Array[Node]) -> void:
 	for node in node_array:

@@ -2,6 +2,18 @@
 extends GraphEdit
 
 
+signal arrange_nodes_requested
+
+
+func _ready():
+	var arrange_button: Button = get_zoom_hbox().get_child(7)
+
+	for connection in arrange_button.pressed.get_connections():
+		arrange_button.pressed.disconnect(connection.callable)
+
+	arrange_button.pressed.connect(func(): arrange_nodes_requested.emit())
+
+
 func _process(_delta):
 	queue_redraw()
 
@@ -20,7 +32,7 @@ func _draw():
 				to_node = node
 		# Draw one line per connection
 		draw_line(_calculate_center_position(from_node), 
-					_calculate_center_position(to_node), Color.BLUE, 5, true)
+					_calculate_center_position(to_node), Color.BLUE, 5 * zoom, true)
 
 
 func _calculate_center_position(control: Control) -> Vector2:
