@@ -59,9 +59,9 @@ func _get_possible_actions(node: Node) -> Array[String]:
 	if not node is Leaf:
 		actions.append("Add Node")
 
-	if not get_graph_node(node).decorated:
-		actions.append("Add Decorator")
-	else:
+	actions.append("Add Decorator")
+
+	if get_graph_node(node).is_decorated:
 		actions.append("Remove Decorator")
 
 	actions.sort()
@@ -110,8 +110,13 @@ func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 
 
 func _remove_decorator(on: Node = selected_tree_node) -> void:
-	var decorator := on if on is Decorator else on.get_parent()
+	var decorator := on# if on is Decorator else on.get_parent()
+	
+	while not decorator is Decorator:
+		decorator = decorator.get_parent()
+	
 	var root := decorator.get_parent()
+	
 	var branch := decorator.get_child(0)
 	var current_index := decorator.get_index()
 	branch.reparent(root)
@@ -119,7 +124,7 @@ func _remove_decorator(on: Node = selected_tree_node) -> void:
 	_set_node_owner(branch)
 	decorator.queue_free()
 	
-	get_graph_node(branch).remove_decorator()
+	get_graph_node(branch).remove_decorator(decorator)
 
 
 func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
@@ -200,32 +205,39 @@ func _build_graph_node(node: Node) -> void:
 	if node == null:
 		return
 
-	var parent_graph_node := get_graph_node(node.get_parent())
-	var graph_node: GraphNode
-	if node is Decorator:
-		if node.get_child_count() > 0:
-			graph_node = _create_graph_node(node.get_child(0), node)
-	else:
-		graph_node = _create_graph_node(node)
+#	var parent_graph_node := get_graph_node(node.get_parent())
+	var decorators: Array[Decorator] = []
+	var parent_node := node.get_parent()
 	
+	while parent_node is Decorator:
+		parent_node = parent_node.get_parent()
+	
+	while node is Decorator:
+		decorators.append(node)
+		if node.get_child_count() > 0:
+			node = node.get_child(0)
+		else:
+			return
+
+	var graph_node := _create_graph_node(node, decorators)
+	var parent_graph_node := get_graph_node(parent_node)
+
 	_graph_edit.connect_node(parent_graph_node.name, 0, graph_node.name, 0)
 
-	if node is Decorator:
-		for child in node.get_child(0).get_children():
-			_build_graph_node(child)
-	else:
-		for child in node.get_children():
-			_build_graph_node(child)
+	for child in node.get_children():
+		_build_graph_node(child)
 
 
-func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
+func _create_graph_node(from: Node, decorators: Array[Decorator] = []) -> GraphNode:
 	# Create a new graph node with the same name and title as "from,"
 	# store a reference to the node it's being created from, and return it
 	var graph_node := TreehaveGraphNode.new()
 	graph_node.title = from.name
 	
-	if decorator != null:
-		graph_node.decorate(decorator.name, _get_node_script_icon(decorator))
+	# goes through decorators in reverse order so that they display correctly
+	decorators.reverse()
+	for decorator in decorators:
+		graph_node.decorate(decorator, _get_node_script_icon(decorator))
 
 	graph_node.add_texture_rect(_get_node_script_icon(from))
 	graph_node.add_label("\n".join(from._get_configuration_warnings()))
@@ -234,7 +246,7 @@ func _create_graph_node(from: Node, decorator: Decorator = null) -> GraphNode:
 
 	graph_node.close_request.connect(_on_graph_node_delete_request.bind(graph_node))
 	graph_node.dragged.connect(_on_graph_node_dragged.bind(graph_node))
-	graph_node.remove_decorator_requested.connect(_on_graph_node_remove_decorator_requested.bind(graph_node))
+	graph_node.remove_decorator_requested.connect(_on_graph_node_remove_decorator_requested)
 
 	return graph_node
 
@@ -291,33 +303,29 @@ func _arrange_graph_node(node: Node) -> void:
 	while queue.size() > 0:
 		var current_node := queue.pop_front()
 
-		if current_node is Decorator:
+		while current_node is Decorator:
 			if current_node.get_child_count() > 0:
 				current_node = current_node.get_child(0)
-				_set_graph_node_position(current_node, true)
-		else:
-			_set_graph_node_position(current_node)
+			else:
+				return
+		
+		_set_graph_node_position(current_node)
 		
 		for child in current_node.get_children():
 			queue.append(child)
 
 
-func _set_graph_node_position(node: Node, on_decorator := false) -> void:
+func _set_graph_node_position(node: Node) -> void:
 	var parent_node := node.get_parent()
-	
-	if on_decorator:
-		# because parent_node would be the decorator,
-		# and we need the decorator's parent instead.
+	var child := node
+
+	while parent_node is Decorator:
+		child = parent_node
 		parent_node = parent_node.get_parent()
 	
 	var graph_node := get_graph_node(node)
 	var parent_graph_node := get_graph_node(parent_node)
-	var sibling_index := node.get_index()
-	
-	if on_decorator:
-		# because node.get_index() would be the node's index under the decorator,
-		# which is not what we need.
-		sibling_index = node.get_parent().get_index()
+	var sibling_index := child.get_index()
 	
 	var sibling_count := parent_node.get_child_count()
 	var width := _get_node_width(node)
@@ -502,5 +510,5 @@ func _on_graph_edit_node_selected(node: GraphNode) -> void:
 	selection_updated.emit(node)
 
 
-func _on_graph_node_remove_decorator_requested(graph_node: GraphNode) -> void:
-	_remove_decorator(get_tree_node(graph_node))
+func _on_graph_node_remove_decorator_requested(decorator: Decorator) -> void:
+	_remove_decorator(decorator)

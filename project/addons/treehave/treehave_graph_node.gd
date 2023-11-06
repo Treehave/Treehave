@@ -1,9 +1,10 @@
 class_name TreehaveGraphNode
 extends GraphNode
 
-signal remove_decorator_requested
+signal remove_decorator_requested(decorator)
 
-var decorated := false
+var is_decorated: bool : get = _get_is_decorated
+var _decorators := {}
 
 
 func _ready()->void:
@@ -14,28 +15,23 @@ func _ready()->void:
 	show_close = true
 
 
-func decorate(decorator_name: String, icon: Texture2D) -> void:
-	if decorated:
-		return
-	
+func decorate(decorator: Decorator, icon: Texture2D) -> void:
 	var hbox_container := HBoxContainer.new()
 	add_texture_rect(icon, hbox_container)
-	add_label(decorator_name, hbox_container)
-	add_button(_on_remove_decorator_button_pressed, "close", hbox_container)
+	add_label(decorator.name, hbox_container)
+	add_button(_on_remove_decorator_button_pressed.bind(decorator), "close", hbox_container)
 	var panel_container := PanelContainer.new()
 	panel_container.add_child(hbox_container)
 	panel_container.add_theme_stylebox_override("panel", preload("res://addons/treehave/decorator_stylebox.tres"))
 	add_child(panel_container)
 	move_child(panel_container, 0)
-	decorated = true
-
-
-func remove_decorator() -> void:
-	if not decorated:
-		return
 	
-	get_child(0).queue_free()
-	decorated = false
+	_decorators[decorator] = panel_container
+
+
+func remove_decorator(decorator) -> void:
+	_decorators[decorator].queue_free()
+	_decorators.erase(decorator)
 
 
 func add_texture_rect(texture: Texture2D, to: Node = self, icon_size := 32) -> void:
@@ -62,5 +58,9 @@ func add_button(bind: Callable, texture_name: String, to: Node = self) -> void:
 	to.add_child(button)
 
 
-func _on_remove_decorator_button_pressed() -> void:
-	remove_decorator_requested.emit()
+func _on_remove_decorator_button_pressed(decorator: Decorator) -> void:
+	remove_decorator_requested.emit(decorator)
+
+
+func _get_is_decorated() -> bool:
+	return _decorators.size() > 0
