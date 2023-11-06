@@ -46,10 +46,14 @@ func _popup_graph_node_menu() -> void:
 	for action in _get_possible_actions(selected_tree_node):
 		menu.add_item(action)
 
-	menu.position = get_global_mouse_position()
-	menu.popup()
+	_popup_at_mouse(menu)
 
 	menu.index_pressed.connect(_on_graph_node_menu_index_pressed.bind(menu))
+
+
+func _popup_at_mouse(menu: PopupMenu) -> void:
+	menu.position = DisplayServer.mouse_get_position()
+	menu.popup()
 
 
 func _get_possible_actions(node: Node) -> Array[String]:
@@ -80,7 +84,7 @@ func _popup_add_node_menu(action: String) -> void:
 				menu.add_item(_get_name_from_path(file_path), id)
 				menu.set_item_metadata(id, file_path)
 
-	menu.popup_centered()
+	_popup_at_mouse(menu)
 
 	menu.index_pressed.connect(_on_add_node_menu_index_pressed.bind(menu))
 
