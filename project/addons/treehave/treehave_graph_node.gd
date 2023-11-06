@@ -46,6 +46,7 @@ func add_texture_rect(texture: Texture2D, to: Node = self, icon_size := 32) -> v
 func add_label(text: String, to: Node = self) -> void:
 	var label := Label.new()
 	label.text = text
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	to.add_child(label)
 
 
