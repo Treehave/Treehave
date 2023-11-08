@@ -1,8 +1,9 @@
 @tool
 extends PanelContainer
 
-signal selection_updated(new_selection)
+enum Actions {ADD_NODE, ADD_DECORATOR, REMOVE_DECORATOR}
 
+signal selection_updated(new_selection)
 
 const X_SPACING := 240.0
 const Y_SPACING := 160.0
@@ -17,12 +18,12 @@ const BEEHAVE_NODES_TO_EXCLUDE := [
 
 var editor_interface: EditorInterface
 var selected_tree_node: Node
-
 var _current_behavior_tree: BeehaveTree
 var _node_graph_node_map: Dictionary = {}
 var _is_treehave_panel_hovered := false
-
 var _previous_action_array: Array[Dictionary] = []
+var _popup_manager := TreehavePopupManager.new()
+var _open_menu_button: MouseButton = MOUSE_BUTTON_RIGHT
 
 @onready var _graph_edit: GraphEdit = %GraphEdit
 
@@ -32,7 +33,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseButton:
-		if event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
+		if event.is_pressed() and event.button_index == _open_menu_button:
 			_popup_graph_node_menu()
 
 
@@ -40,53 +41,46 @@ func _popup_graph_node_menu() -> void:
 	if selected_tree_node == null:
 		return
 
-	var menu := PopupMenu.new()
-	add_child(menu)
-
+	var menu := _popup_manager.create_popup_menu(get_global_mouse_position())
+	
 	for action in _get_possible_actions(selected_tree_node):
-		menu.add_item(action)
-
-	_popup_at_mouse(menu)
+		_popup_manager.add_item_to_menu(_get_action_string(action), action)
 
 	menu.index_pressed.connect(_on_graph_node_menu_index_pressed.bind(menu))
+	add_child(menu)
 
 
-func _popup_at_mouse(menu: PopupMenu) -> void:
-	menu.position = DisplayServer.mouse_get_position()
-	menu.popup()
+func _get_action_string(action: Actions) -> String:
+	return Actions.keys()[action].capitalize()
 
 
-func _get_possible_actions(node: Node) -> Array[String]:
-	# possible actions are Add Node, Add Decorator, and Remove Decorator
-	var actions: Array[String] = []
+func _get_possible_actions(node: Node) -> Array[Actions]:
+	var actions: Array[Actions] = []
+
+	actions.append(Actions.ADD_DECORATOR)
 
 	if not node is Leaf:
-		actions.append("Add Node")
-
-	actions.append("Add Decorator")
+		actions.append(Actions.ADD_NODE)
 
 	if get_graph_node(node).is_decorated:
-		actions.append("Remove Decorator")
+		actions.append(Actions.REMOVE_DECORATOR)
 
 	actions.sort()
 	return actions
 
 
-func _popup_add_node_menu(action: String) -> void:
-	var menu := PopupMenu.new()
-	add_child(menu)
-
+func _popup_add_node_menu(action: Actions) -> void:
+	var menu := _popup_manager.create_popup_menu(get_global_mouse_position())
+	
 	for file_path in _get_gd_files_in_directory(editor_interface.get_resource_filesystem().get_filesystem()):
+		editor_interface.get_resource_filesystem()
 		var instance = load(file_path).new()
 		if instance is BeehaveNode and not BEEHAVE_NODES_TO_EXCLUDE.has(file_path):
-			if (action == "Add Node" and not instance is Decorator) or (action == "Add Decorator" and instance is Decorator):
-				var id := menu.item_count
-				menu.add_item(_get_name_from_path(file_path), id)
-				menu.set_item_metadata(id, file_path)
-
-	_popup_at_mouse(menu)
+			if (action == Actions.ADD_NODE and not instance is Decorator) or (action == Actions.ADD_DECORATOR and instance is Decorator):
+				_popup_manager.add_item_to_menu(_get_name_from_path(file_path), file_path)
 
 	menu.index_pressed.connect(_on_add_node_menu_index_pressed.bind(menu))
+	add_child(menu)
 
 
 func _get_gd_files_in_directory(directory:EditorFileSystemDirectory) -> Array[String]:
@@ -103,12 +97,12 @@ func _get_gd_files_in_directory(directory:EditorFileSystemDirectory) -> Array[St
 
 
 func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
-	match menu.get_item_text(index):
-		"Add Node":
-			_popup_add_node_menu("Add Node")
-		"Add Decorator":
-			_popup_add_node_menu("Add Decorator")
-		"Remove Decorator":
+	match menu.get_item_metadata(index):
+		Actions.ADD_NODE:
+			_popup_add_node_menu(Actions.ADD_NODE)
+		Actions.ADD_DECORATOR:
+			_popup_add_node_menu(Actions.ADD_DECORATOR)
+		Actions.REMOVE_DECORATOR:
 			_remove_decorator()
 	menu.queue_free()
 
@@ -116,6 +110,8 @@ func _on_graph_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 func _remove_decorator(node: Node = selected_tree_node) -> void:
 	while not node is Decorator:
 		node = node.get_parent()
+		if node is BeehaveTree:
+			return
 
 	var decorator: Decorator = node
 	var root := decorator.get_parent()
@@ -232,15 +228,9 @@ func _create_graph_node(from: Node, decorators: Array[Decorator] = []) -> GraphN
 	# Create a new graph node with the same name and title as "from,"
 	# store a reference to the node it's being created from, and return it
 	var graph_node := TreehaveGraphNode.new()
-	graph_node.title = from.name
-
-	# goes through decorators in reverse order so that they display correctly
-	decorators.reverse()
-	for decorator in decorators:
-		graph_node.decorate(decorator, _get_node_script_icon(decorator))
-
-	graph_node.add_texture_rect(_get_node_script_icon(from))
-	graph_node.add_label("\n".join(from._get_configuration_warnings()))
+	# is passing a function around like this really dumb or just kinda dumb?
+	graph_node.create(from, decorators, _get_node_script_icon)
+	
 	_graph_edit.add_child(graph_node)
 	_node_graph_node_map[from] = graph_node
 
@@ -427,6 +417,7 @@ func _undo_last_graph_action() -> void:
 	_clear_current_graph()
 	_build_current_tree_graph()
 	_arrange_current_tree_graph()
+
 
 func _reconstruct_tree(nodes_removed: Array) -> void:
 	var nodes := []
