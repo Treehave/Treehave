@@ -15,6 +15,18 @@ func _ready()->void:
 	show_close = true
 
 
+func create(from: Node, decorators: Array[Decorator], _get_node_script_icon: Callable) -> void:
+	title = from.name
+	
+	# goes through decorators in reverse order so that they display correctly
+	decorators.reverse()
+	for decorator in decorators:
+		decorate(decorator, _get_node_script_icon.call(decorator))
+
+	add_texture_rect(_get_node_script_icon.call(from))
+	add_label("\n".join(from._get_configuration_warnings()))
+
+
 func decorate(decorator: Decorator, icon: Texture2D) -> void:
 	var hbox_container := HBoxContainer.new()
 	add_texture_rect(icon, hbox_container)
