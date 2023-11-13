@@ -241,16 +241,16 @@ func _create_graph_node(from: Node, decorators: Array[Decorator] = []) -> GraphN
 	return graph_node
 
 
-func _delete_graph_node(graph_node: GraphNode) -> Array:
+func _delete_node(node: Node) -> Array:
 	var nodes_removed := []
-	var node = get_tree_node(graph_node)
+	var graph_node = get_graph_node(node)
 
 	if node is BeehaveTree:
 		return []
 
 	for child in node.get_children():
 		# Append nodes removed from children
-		nodes_removed.append_array(_delete_graph_node(get_graph_node(child)))
+		nodes_removed.append_array(_delete_node(child))
 
 	_node_graph_node_map.erase(node)
 	_node_graph_node_map.erase(graph_node)
@@ -451,13 +451,13 @@ func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	var nodes_removed := []
 
 	for node_name in nodes:
-		nodes_removed.append_array(_delete_graph_node(_graph_edit.get_node(str(node_name))))
+		nodes_removed.append_array(_delete_node(get_tree_node(_graph_edit.get_node(str(node_name)))))
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
 
 func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
-	var nodes_removed := _delete_graph_node(graph_node)
+	var nodes_removed := _delete_node(get_tree_node(graph_node))
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
