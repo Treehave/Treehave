@@ -31,7 +31,7 @@ func _on_selection_changed()->void:
 	var selected_object := selected_objects[0]
 
 	if is_instance_valid(_current_behavior_tree):
-		if dock.get_graph_node(selected_object) == null or dock.get_graph_node(selected_object).selected:
+		if dock.get_tree_node(selected_object) == null or dock.get_tree_node(selected_object).selected:
 			return
 
 	if selected_object is BeehaveNode or selected_object is BeehaveTree:
