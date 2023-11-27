@@ -16,7 +16,7 @@ func _ready()->void:
 
 
 func create(from: Node, decorators: Array[Decorator], _get_node_script_icon: Callable) -> void:
-	title = from.name
+	title = _add_spaces_between_words(from.name)
 	
 	# goes through decorators in reverse order so that they display correctly
 	decorators.reverse()
@@ -25,6 +25,16 @@ func create(from: Node, decorators: Array[Decorator], _get_node_script_icon: Cal
 
 	add_texture_rect(_get_node_script_icon.call(from))
 	add_label("\n".join(from._get_configuration_warnings()))
+
+
+func _add_spaces_between_words(target:String)->String:
+	var return_string := ""
+	for char in target:
+		if char.to_upper() == char:
+			return_string += " "
+		return_string += char
+	
+	return return_string
 
 
 func decorate(decorator: Decorator, icon: Texture2D) -> void:

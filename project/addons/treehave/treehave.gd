@@ -134,12 +134,12 @@ func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	if new_tree_node is Decorator:
 		var current_index := selected_tree_node.get_index()
 		var parent_node := selected_tree_node.get_parent()
-		parent_node.add_child(new_tree_node)
+		_add_name_safe_child(parent_node, new_tree_node)
 		parent_node.move_child(new_tree_node, current_index)
 		selected_tree_node.reparent(new_tree_node)
 		_set_node_owner(parent_node)
 	else:
-		selected_tree_node.add_child(new_tree_node)
+		_add_name_safe_child(selected_tree_node, new_tree_node)
 	new_tree_node.owner = _current_behavior_tree
 
 	_build_graph_node(new_tree_node)
@@ -147,6 +147,25 @@ func _on_add_node_menu_index_pressed(index: int, menu: PopupMenu) -> void:
 	set_tree(_current_behavior_tree)
 
 	menu.queue_free()
+
+
+func _add_name_safe_child(parent:Node, child:Node)->void:
+	child.name = _make_name_safe(child.name, parent)
+	parent.add_child(child)
+
+
+func _make_name_safe(node_name:String, parent:Node)->String:
+	node_name = node_name.replace(" ", "")
+	
+	var number_of_nodes_that_match_child_name := 0
+	for node in parent.get_children():
+		if node.name.rstrip("0123456789") == node_name:
+			number_of_nodes_that_match_child_name += 1
+	
+	if number_of_nodes_that_match_child_name > 0:
+		node_name += str(number_of_nodes_that_match_child_name + 1)
+	
+	return node_name
 
 
 func _set_node_owner(node: Node) -> void:
