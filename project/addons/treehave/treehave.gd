@@ -77,7 +77,7 @@ func _popup_add_node_menu(action: Actions) -> void:
 		var instance = load(file_path).new()
 		if instance is BeehaveNode and not BEEHAVE_NODES_TO_EXCLUDE.has(file_path):
 			if (action == Actions.ADD_NODE and not instance is Decorator) or (action == Actions.ADD_DECORATOR and instance is Decorator):
-				_popup_manager.add_item_to_menu(_get_name_from_path(file_path), file_path)
+				_popup_manager.add_item_to_menu(_get_name_from_path(file_path), file_path, _get_node_script_icon(instance))
 
 	menu.index_pressed.connect(_on_add_node_menu_index_pressed.bind(menu))
 	add_child(menu)
