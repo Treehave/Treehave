@@ -222,10 +222,7 @@ func _build_graph_node(node: Node) -> void:
 		return
 
 	var decorators: Array[Decorator] = []
-	var parent_node := node.get_parent()
-
-	while parent_node is Decorator:
-		parent_node = parent_node.get_parent()
+	var parent_node := _get_first_non_decorator_ancestor(node)
 
 	while node is Decorator:
 		decorators.append(node)
@@ -470,13 +467,37 @@ func _on_graph_edit_delete_nodes_request(nodes: Array[StringName]) -> void:
 	var nodes_removed := []
 
 	for node_name in nodes:
-		nodes_removed.append_array(_delete_node(get_tree_node(_graph_edit.get_node(str(node_name)))))
+		nodes_removed.append_array(
+			_delete_node(
+				_get_last_decorator_ancestor(
+					get_tree_node(_graph_edit.get_node(str(node_name)))
+				)
+			)
+		)
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
 
+func _get_last_decorator_ancestor(tree_node:Node) -> Node:
+	var ancestor := tree_node
+	while ancestor.get_parent() is Decorator:
+		ancestor = ancestor.get_parent()
+	return ancestor
+
+
+func _get_first_non_decorator_ancestor(tree_node: Node) -> Node:
+	var parent_node := tree_node.get_parent()
+	while parent_node is Decorator:
+		parent_node = parent_node.get_parent()
+	return parent_node
+
+
 func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
-	var nodes_removed := _delete_node(get_tree_node(graph_node))
+	var nodes_removed := _delete_node(
+		_get_last_decorator_ancestor(
+			get_tree_node(graph_node)
+		)
+	)
 
 	_store_last_graph_action("delete_nodes", nodes_removed)
 
