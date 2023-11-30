@@ -201,7 +201,7 @@ func _clear_current_graph() -> void:
 
 
 func get_graph_node(node: Node) -> GraphNode:
-	if node is Decorator and node.get_child_count() > 0:
+	while node is Decorator and node.get_child_count() > 0:
 		node = node.get_child(0)
 
 	return _node_graph_node_map.get(node)
@@ -392,6 +392,8 @@ func _get_node_script_icon(node: Node) -> ImageTexture:
 
 func _reorder_nodes(parent: Node) -> void:
 	var child_order := parent.get_children()
+	print(child_order)
+	
 	child_order.sort_custom(
 		func (a: Node, b: Node):
 			return get_graph_node(a).position_offset.x < get_graph_node(b).position_offset.x
@@ -503,13 +505,12 @@ func _on_graph_node_delete_request(graph_node: GraphNode) -> void:
 
 
 func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode) -> void:
-	var parent := get_tree_node(graph_node).get_parent()
-	var old_child_order := parent.get_children()
+	var root := _get_first_non_decorator_ancestor(get_tree_node(graph_node))
+	var old_child_order := root.get_children()
 
-	_reorder_nodes(parent)
+	_store_last_graph_action("reorder_nodes", [root, old_child_order])
+	_reorder_nodes(root)
 
-	_store_last_graph_action("reorder_nodes", [parent, old_child_order])
-	_reorder_nodes(get_tree_node(graph_node).get_parent())
 	selection_updated.emit(graph_node)
 
 
