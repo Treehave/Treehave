@@ -157,7 +157,7 @@ func _add_name_safe_child(parent:Node, child:Node)->void:
 
 
 func _make_name_safe(node_name:String, parent:Node)->String:
-	node_name = node_name.replace(" ", "")
+	node_name = node_name.replace(" ", "").rstrip("0123456789")
 	
 	var number_of_nodes_that_match_child_name := 0
 	for node in parent.get_children():
@@ -522,28 +522,45 @@ func _on_graph_node_dragged(_from: Vector2, _to: Vector2, graph_node: GraphNode)
 
 
 func _attempt_reparent(graph_node:GraphNode)->void:
-	for composite_node in _get_composite_nodes():
-		var composite_graph_node := get_graph_node(composite_node)
-		if composite_graph_node != graph_node:
-			if _get_distance_between(composite_graph_node, graph_node) <= REPARENT_DISTANCE:
-				_reparent_node(get_tree_node(graph_node), composite_node)
+	for reparent_target in _get_potential_parent_nodes():
+		var reparent_target_graph_node := get_graph_node(reparent_target)
+		if reparent_target_graph_node != graph_node and not _is_child_of(get_tree_node(graph_node), reparent_target):
+			if _get_distance_between(reparent_target_graph_node, graph_node) <= REPARENT_DISTANCE:
+				_reparent_node(get_tree_node(graph_node), reparent_target)
 				return
 
 
-func _get_composite_nodes(from: Node = _current_behavior_tree)->Array[Composite]:
-	var composite_nodes : Array[Composite] = []
+func _is_child_of(parent:Node, node:Node)->bool:
+	var stack := [parent]
+	
+	while stack.size() > 0:
+		for child in stack[0].get_children():
+			if child == node:
+				return true
+			stack.append(child)
+		stack.remove_at(0)
+	
+	return false
+
+
+func _get_potential_parent_nodes(from: Node = _current_behavior_tree)->Array[Node]:
+	var valid_parents : Array[Node] = []
+	
+	if from is Composite or from is BeehaveTree:
+		valid_parents.append(from)
 	
 	for node in from.get_children():
-		if node is Composite:
-			composite_nodes.append(node)
-		composite_nodes.append_array(_get_composite_nodes(node))
+		valid_parents.append_array(_get_potential_parent_nodes(node))
 	
-	return composite_nodes
+	return valid_parents
 
 
-func _reparent_node(node:Node, new_parent:Composite)->void:
+func _reparent_node(node:Node, new_parent:Node)->void:
 	var graph_node := get_graph_node(node)
 	_graph_edit.disconnect_node(get_graph_node(_get_first_non_decorator_ancestor(node)).name, 0, graph_node.name, 0)
+	
+	node.name = _make_name_safe(node.name, new_parent)
+	print(node.name)
 	
 	_get_last_decorator_ancestor(node).reparent(new_parent)
 	
