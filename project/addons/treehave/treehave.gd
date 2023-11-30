@@ -220,7 +220,8 @@ func get_tree_node(graph_node: GraphNode) -> Node:
 func _build_current_tree_graph() -> void:
 	# Translates the beehave tree represented by _current_behavior_tree into a graph.
 	_create_graph_node(_current_behavior_tree)
-	_build_graph_node(_current_behavior_tree.get_child(0))
+	for root in _current_behavior_tree.get_children():
+		_build_graph_node(root)
 
 
 func _build_graph_node(node: Node) -> void:
@@ -301,8 +302,7 @@ func _remove_all_connections(graph_node: GraphNode) -> void:
 
 func _arrange_current_tree_graph() -> void:
 	# Arranges the graph nodes in the GraphEdit.
-	var node := _current_behavior_tree.get_child(0)
-	_arrange_graph_node(node)
+	_arrange_graph_node(_current_behavior_tree)
 
 
 func _arrange_graph_node(node: Node) -> void:
@@ -557,8 +557,9 @@ func _reparent_node(node:Node, new_parent:Composite)->void:
 
 
 func _get_distance_between(a:GraphNode, b:GraphNode)->float:
-	var distance_between_centers := a.position_offset.distance_to(b.position_offset)
-	return distance_between_centers
+	var center_of_a := a.position_offset + a.size / 2
+	var center_of_b := b.position_offset + b.size / 2
+	return center_of_a.distance_to(center_of_b)
 
 
 func _on_graph_edit_mouse_entered() -> void:
